@@ -1,0 +1,169 @@
+{
+  "users": [
+    {
+      "companyCode": "5747",
+      "companyName": "Adani Enterprises Ltd.",
+      "industry": "Trading - Minerals",
+      "symbol": "ADANIENT",
+      "totalIncome2025": "43503.77",
+      "pat2025": "6040.23",
+      "assets2025": "50399.01",
+      "netWorth2025": "26698.89",
+      "debt2025": "12829.13"
+    },
+    {
+      "companyCode": "86597",
+      "companyName": "Adani Ports & Special Economic Zone Ltd.",
+      "industry": "Port & Port services",
+      "symbol": "ADANIPORTS",
+      "totalIncome2025": "10607.50",
+      "pat2025": "2457.15",
+      "assets2025": "87938.06",
+      "netWorth2025": "30270.06",
+      "debt2025": "51746.10"
+    },
+    {
+      "companyCode": "18102",
+      "companyName": "Apollo Hospitals Enterprise Ltd.",
+      "industry": "Hospital",
+      "symbol": "APOLLOHOSP",
+      "totalIncome2025": "8944.30",
+      "pat2025": "1296.30",
+      "assets2025": "14012.40",
+      "netWorth2025": "8734.20",
+      "debt2025": "3092.00"
+    },
+    {
+      "companyCode": "22859",
+      "companyName": "Asian Paints Ltd.",
+      "industry": "Paints",
+      "symbol": "ASIANPAINT",
+      "totalIncome2025": "37260.88",
+      "pat2025": "3584.88",
+      "assets2025": "27275.90",
+      "netWorth2025": "18503.91",
+      "debt2025": "1198.82"
+    },
+    {
+      "companyCode": "256066",
+      "companyName": "Axis Bank Ltd.",
+      "industry": "Private Sector Bank",
+      "symbol": "AXISBANK",
+      "totalIncome2025": "152144.97",
+      "pat2025": "26373.48",
+      "assets2025": "1611217.92",
+      "netWorth2025": "179725.12",
+      "debt2025": "184146.51"
+    },
+    {
+      "companyCode": "374518",
+      "companyName": "Bajaj Auto Ltd.",
+      "industry": "2/3 Wheelers",
+      "symbol": "BAJAJ-AUTO",
+      "totalIncome2025": "51980.91",
+      "pat2025": "8151.42",
+      "assets2025": "42513.16",
+      "netWorth2025": "29275.74",
+      "debt2025": "927.64"
+    },
+    {
+      "companyCode": "28897",
+      "companyName": "Bajaj Finance Ltd.",
+      "industry": "Non Banking Financial Company (NBFC)",
+      "symbol": "BAJFINANCE",
+      "totalIncome2025": "62228.89",
+      "pat2025": "16661.50",
+      "assets2025": "374660.87",
+      "netWorth2025": "87913.90",
+      "debt2025": "269669.42"
+    },
+    {
+      "companyCode": "374519",
+      "companyName": "Bajaj Finserv Ltd.",
+      "industry": "Holding Company",
+      "symbol": "BAJAJFINSV",
+      "totalIncome2025": "2299.21",
+      "pat2025": "1558.87",
+      "assets2025": "8529.39",
+      "netWorth2025": "8371.89",
+      "debt2025": ""
+    },
+    {
+      "companyCode": "33727",
+      "companyName": "Bharat Electronics Ltd.",
+      "industry": "Aerospace & Defense",
+      "symbol": "BEL",
+      "totalIncome2025": "24441.28",
+      "pat2025": "5288.25",
+      "assets2025": "44878.07",
+      "netWorth2025": "19697.53",
+      "debt2025": "61.23"
+    },
+    {
+      "companyCode": "34162",
+      "companyName": "Bharti Airtel Ltd.",
+      "industry": "Telecom - Cellular & Fixed line services",
+      "symbol": "BHARTIARTL",
+      "totalIncome2025": "121965.60",
+      "pat2025": "23501.80",
+      "assets2025": "398922.80",
+      "netWorth2025": "139997.30",
+      "debt2025": "163417.10"
+    },
+    {
+      "companyCode": "47858",
+      "companyName": "Cipla Ltd.",
+      "industry": "Pharmaceuticals",
+      "symbol": "CIPLA",
+      "totalIncome2025": "20484.88",
+      "pat2025": "5157.65",
+      "assets2025": "35860.04",
+      "netWorth2025": "32099.24",
+      "debt2025": "117.38"
+    },
+    {
+      "companyCode": "48799",
+      "companyName": "Coal India Ltd.",
+      "industry": "Coal",
+      "symbol": "COALINDIA",
+      "totalIncome2025": "18701.09",
+      "pat2025": "17016.56",
+      "assets2025": "26041.70",
+      "netWorth2025": "18070.85",
+      "debt2025": ""
+    },
+    {
+      "companyCode": "62987",
+      "companyName": "Dr. Reddy'S Laboratories Ltd.",
+      "industry": "Pharmaceuticals",
+      "symbol": "DRREDDY",
+      "totalIncome2025": "24118.80",
+      "pat2025": "5349.40",
+      "assets2025": "38466.30",
+      "netWorth2025": "28856.60",
+      "debt2025": "3492.90"
+    },
+    {
+      "companyCode": "66185",
+      "companyName": "Eicher Motors Ltd.",
+      "industry": "2/3 Wheelers",
+      "symbol": "EICHERMOT",
+      "totalIncome2025": "20083.27",
+      "pat2025": "4279.26",
+      "assets2025": "24244.62",
+      "netWorth2025": "18499.84",
+      "debt2025": "267.27"
+    },
+    {
+      "companyCode": "412105",
+      "companyName": "Eternal Ltd.",
+      "industry": "E-Retail/ E-Commerce",
+      "symbol": "ETERNAL",
+      "totalIncome2025": "10292.00",
+      "pat2025": "1960.00",
+      "assets2025": "36185.00",
+      "netWorth2025": "33853.00",
+      "debt2025": "173.00"
+    }
+  ]
+}
