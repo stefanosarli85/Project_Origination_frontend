@@ -116,8 +116,11 @@ const ItalyTable = () => {
                 value.replace("<", "").trim()
               );
             } else {
-              params.append("employees_min", value);
-            }
+
+  // exact value search
+  params.append("employees_min", value.trim());
+  params.append("employees_max", value.trim());
+}
           }
         });
  
