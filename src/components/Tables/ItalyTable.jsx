@@ -1,224 +1,259 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-
+ 
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-
+ 
 const ItalyTable = () => {
   const navigate = useNavigate();
-
+ 
   const [data, setData] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-
-  // fetch data from db.json
+ 
+  // server side filters
+  const [columnFilters, setColumnFilters] = useState([]);
+ 
+  // fetch data
   useEffect(() => {
-   const fetchData = async () => {
-  try {
-    setIsLoading(true);
-
-    const response = await fetch(
-      "http://43.205.207.160:1701/api/italy-get-all-records?page=1"
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch data");
-    }
-
-    const json = await response.json();
-
-    console.log("ITALY API:", json);
-    console.log(json.data[0]);
-
-    setData(json.data || []);
-
-    setIsError(false);
-  } catch (error) {
-    console.error(error);
-    setIsError(true);
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+ 
+        const params = new URLSearchParams();
+ 
+        let hasFilters = false;
+ 
+        columnFilters.forEach((filter) => {
+          const value = filter.value?.toString().trim();
+ 
+          if (!value) return;
+ 
+          hasFilters = true;
+ 
+          // Company Code
+          if (filter.id === "codice_fiscale") {
+            params.append("company_code", value);
+          }
+ 
+          // Company Name
+          if (filter.id === "denominazione") {
+            params.append("company_name", value);
+          }
+ 
+          // City
+          if (filter.id === "comune") {
+            params.append("city", value);
+          }
+ 
+          // Industry Code
+          if (filter.id === "codice_ateco") {
+            params.append("industry_code", value);
+          }
+ 
+          // Revenue
+          if (filter.id === "ricavi_operativi_2024") {
+            if (value.includes("-")) {
+              const [min, max] = value.split("-");
+ 
+              params.append("revenue_min", min.trim());
+              params.append("revenue_max", max.trim());
+            } else if (value.startsWith(">")) {
+              params.append(
+                "revenue_min",
+                value.replace(">", "").trim()
+              );
+            } else if (value.startsWith("<")) {
+              params.append(
+                "revenue_max",
+                value.replace("<", "").trim()
+              );
+            } else {
+              params.append("revenue_min", value);
+            }
+          }
+ 
+          // EBIT
+          if (filter.id === "ebit_2024") {
+            if (value.includes("-")) {
+              const [min, max] = value.split("-");
+ 
+              params.append("ebit_min", min.trim());
+              params.append("ebit_max", max.trim());
+            } else if (value.startsWith(">")) {
+              params.append(
+                "ebit_min",
+                value.replace(">", "").trim()
+              );
+            } else if (value.startsWith("<")) {
+              params.append(
+                "ebit_max",
+                value.replace("<", "").trim()
+              );
+            } else {
+              params.append("ebit_min", value);
+            }
+          }
+ 
+          // Employees
+          if (filter.id === "numero_dipendenti_2024") {
+            if (value.includes("-")) {
+              const [min, max] = value.split("-");
+ 
+              params.append("employees_min", min.trim());
+              params.append("employees_max", max.trim());
+            } else if (value.startsWith(">")) {
+              params.append(
+                "employees_min",
+                value.replace(">", "").trim()
+              );
+            } else if (value.startsWith("<")) {
+              params.append(
+                "employees_max",
+                value.replace("<", "").trim()
+              );
+            } else {
+              params.append("employees_min", value);
+            }
+          }
+        });
+ 
+        // TWO APIs
+        const url = hasFilters
+          ? `http://43.205.207.160:1701/api/italy-search-columns?${params.toString()}`
+          : `http://43.205.207.160:1701/api/italy-get-all-records?page=1`;
+ 
+        console.log("API URL:", url);
+ 
+        const response = await fetch(url);
+ 
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+ 
+        const json = await response.json();
+ 
+        console.log("API RESPONSE:", json);
+ 
+        setData(json.data || []);
+ 
+        setIsError(false);
+      } catch (error) {
+        console.error(error);
+        setIsError(true);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+ 
     fetchData();
-  }, []);
-const columns = useMemo(
-  () => [
-    {
-      accessorKey: "codice_fiscale",
-      header: "Company Code",
-    },
-    {
-      accessorKey: "denominazione",
-      header: "Company Name",
-    },
-    {
-      accessorKey: "comune",
-      header: "City",
-      filterFn: "includesString",
-    },
-    {
-      accessorKey: "codice_ateco",
-      header: "Industry Code",
-    },
-    {
-      accessorKey: "ricavi_operativi_2024",
-      header: "Revenue 2024",
-      filterFn: "customNumberFilter",
-      Cell: ({ cell }) =>
-        Number(cell.getValue()).toLocaleString("en-US"),
-    },
-    {
-      accessorKey: "ebit_2024",
-      header: "EBIT 2024",
-      filterFn: "customNumberFilter",
-      Cell: ({ cell }) =>
-        Number(cell.getValue()).toLocaleString("en-US"),
-    },
-    {
-      accessorKey: "numero_dipendenti_2024",
-      header: "Employees 2024",
-      filterFn: "customNumberFilter",
-      Cell: ({ cell }) =>
-        Number(cell.getValue()).toLocaleString("en-US"),
-    },
-  ],
-  []
-);
+  }, [columnFilters]);
+ 
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "codice_fiscale",
+        header: "Company Code",
+      },
+      {
+        accessorKey: "denominazione",
+        header: "Company Name",
+      },
+      {
+        accessorKey: "comune",
+        header: "City",
+      },
+      {
+        accessorKey: "codice_ateco",
+        header: "Industry Code",
+      },
+      {
+        accessorKey: "ricavi_operativi_2024",
+        header: "Revenue 2024",
+        Cell: ({ cell }) =>
+          Number(cell.getValue()).toLocaleString("en-US"),
+      },
+      {
+        accessorKey: "ebit_2024",
+        header: "EBIT 2024",
+        Cell: ({ cell }) =>
+          Number(cell.getValue()).toLocaleString("en-US"),
+      },
+      {
+        accessorKey: "numero_dipendenti_2024",
+        header: "Employees 2024",
+        Cell: ({ cell }) =>
+          Number(cell.getValue()).toLocaleString("en-US"),
+      },
+    ],
+    []
+  );
+ 
   // single row selection
   const handleRowSelection = (rowId) => {
     setRowSelection({
       [rowId]: true,
     });
   };
-
+ 
   const handleFetchReports = () => {
     const selectedRow =
       table.getSelectedRowModel().rows[0];
-
+ 
     if (!selectedRow) return;
-
+ 
     navigate("/italy-reports", {
       state: {
         companyCodes: [
-         selectedRow.original.codice_fiscale
+          selectedRow.original.codice_fiscale,
         ],
       },
     });
   };
-
-
-  const customNumberFilter = (
-  row,
-  columnId,
-  filterValue
-) => {
-  const value = Number(
-    String(row.getValue(columnId)).replace(/,/g, "")
-  );
-
-  if (!filterValue) return true;
-
-  const parseValue = (val) => {
-    val = val.toUpperCase().replace(/,/g, "").trim();
-
-    if (val.includes("M")) {
-      return parseFloat(val) * 1000000;
-    }
-
-    if (val.includes("K")) {
-      return parseFloat(val) * 1000;
-    }
-
-    return Number(val);
-  };
-
-  const input = filterValue
-    .toString()
-    .toUpperCase()
-    .replace(/\s/g, "")
-    .trim();
-
-  // range: 5M-10M
-  if (input.includes("-")) {
-    const [min, max] = input.split("-");
-
-    return (
-      value >= parseValue(min) &&
-      value <= parseValue(max)
-    );
-  }
-
-  // >=
-  if (input.startsWith(">=")) {
-    return value >= parseValue(input.slice(2));
-  }
-
-  // <=
-  if (input.startsWith("<=")) {
-    return value <= parseValue(input.slice(2));
-  }
-
-  // >
-  if (input.startsWith(">")) {
-    return value > parseValue(input.slice(1));
-  }
-
-  // <
-  if (input.startsWith("<")) {
-    return value < parseValue(input.slice(1));
-  }
-
-  return value === parseValue(input);
-};
-
+ 
   const table = useMaterialReactTable({
-
     columns,
     data,
-    filterFns: {
-  customNumberFilter,
-},
-
+ 
     enableRowSelection: true,
     enableMultiRowSelection: false,
     enablePagination: true,
     enableSorting: true,
     enableColumnFilters: true,
     enableGlobalFilter: false,
-
+ 
+    // IMPORTANT
+    manualFiltering: true,
+ 
+    onColumnFiltersChange: setColumnFilters,
+ 
     getRowId: (row) => row.codice_fiscale,
+ 
     state: {
       rowSelection,
       isLoading,
       showAlertBanner: isError,
+      columnFilters,
     },
-
+ 
     muiSelectCheckboxProps: ({ row }) => ({
       checked: !!rowSelection[row.id],
       onChange: () =>
         handleRowSelection(row.id),
     }),
-
-   initialState: {
-  pagination: {
-    pageIndex: 0,
-    pageSize: 10,
-  },
-  showColumnFilters: true,
-  showGlobalFilter: false,
-  sorting: [
-    {
-      id: "Ricavi Operativi 2024",
-      desc: true,
+ 
+    initialState: {
+      pagination: {
+        pageIndex: 0,
+        pageSize: 10,
+      },
+      showColumnFilters: true,
+      showGlobalFilter: false,
     },
-  ],
-},
-
+ 
     renderTopToolbarCustomActions: () => (
       <button
         onClick={handleFetchReports}
@@ -239,7 +274,7 @@ const columns = useMemo(
         Fetch Financial Reports
       </button>
     ),
-
+ 
     muiToolbarAlertBannerProps: isError
       ? {
           color: "error",
@@ -247,10 +282,11 @@ const columns = useMemo(
         }
       : undefined,
   });
-
+ 
   return (
     <MaterialReactTable table={table} />
   );
 };
-
+ 
 export default ItalyTable;
+ 
