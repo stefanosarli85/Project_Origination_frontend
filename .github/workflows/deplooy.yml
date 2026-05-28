@@ -3,7 +3,7 @@ name: Deploy Frontend to EC2
 on:
   push:
     branches:
-      - main  # Change to your deployment branch
+      - main
 
 jobs:
   deploy:
@@ -15,21 +15,22 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js
+      # 2. Setup Node.js (upgraded to 20)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
 
-      # 3. Install dependencies
+      # 3. Install dependencies (clean install)
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install
 
       # 4. Build the Vite app
       - name: Build Project
         run: npm run build
-        # Output goes to /dist folder
 
       # 5. Deploy to EC2 via SSH
       - name: Deploy to EC2
@@ -40,11 +41,12 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             # Pull latest code on EC2
-            cd /var/www/Project_Origination_frontend
+            cd /home/ubuntu/Project_Origination_frontend
             git pull origin main
 
-            # Install dependencies & rebuild
-            npm ci
+            # Clean install & rebuild
+            rm -rf node_modules package-lock.json
+            npm install
             npm run build
 
             # Copy build output to Nginx web root
