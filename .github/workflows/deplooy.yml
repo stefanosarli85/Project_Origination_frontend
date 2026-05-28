@@ -1,0 +1,57 @@
+name: Deploy Frontend to EC2
+
+on:
+  push:
+    branches:
+      - main  # Change to your deployment branch
+
+jobs:
+  deploy:
+    name: Build & Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout code
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # 3. Install dependencies
+      - name: Install Dependencies
+        run: npm ci
+
+      # 4. Build the Vite app
+      - name: Build Project
+        run: npm run build
+        # Output goes to /dist folder
+
+      # 5. Deploy to EC2 via SSH
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # Pull latest code on EC2
+            cd /var/www/Project_Origination_frontend
+            git pull origin main
+
+            # Install dependencies & rebuild
+            npm ci
+            npm run build
+
+            # Copy build output to Nginx web root
+            sudo rm -rf /var/www/html/*
+            sudo cp -r dist/* /var/www/html/
+
+            # Reload Nginx
+            sudo systemctl reload nginx
+
+            echo "✅ Deployment complete!"
