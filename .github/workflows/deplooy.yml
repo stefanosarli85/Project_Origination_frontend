@@ -11,28 +11,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 2. Setup Node.js (upgraded to 20)
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      # 3. Install dependencies (clean install)
-      - name: Install Dependencies
-        run: |
-          rm -rf node_modules package-lock.json
-          npm install
-
-      # 4. Build the Vite app
-      - name: Build Project
-        run: npm run build
-
-      # 5. Deploy to EC2 via SSH
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -40,20 +21,21 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # Pull latest code on EC2
             cd /home/ubuntu/Project_Origination_frontend
             git pull origin main
 
-            # Clean install & rebuild
-            rm -rf node_modules package-lock.json
-            npm install
-            npm run build
+            # Build Docker image
+            sudo docker build -t project_origination_frontend .
 
-            # Copy build output to Nginx web root
-            sudo rm -rf /var/www/html/*
-            sudo cp -r dist/* /var/www/html/
+            # Stop and remove old container
+            sudo docker stop project-origination-frontend || true
+            sudo docker rm project-origination-frontend || true
 
-            # Reload Nginx
-            sudo systemctl reload nginx
+            # Run new container
+            sudo docker run -d \
+              -p 80:80 \
+              --restart always \
+              --name project-origination-frontend \
+              project_origination_frontend
 
-            echo "✅ Deployment complete!"
+            echo "✅ Frontend deployed!"
