@@ -415,7 +415,7 @@ liabilitiesData.forEach((item) => {
       letterSpacing: "0.3px",
     }}
   >
-    {company?.denominazione || "Company"} - Italy Financial Report Dashboard
+    {company?.denominazione || "Company"} - {company?.company_name || "Italy Financial Report Dashboard"}
   </h1>
 
   <button
