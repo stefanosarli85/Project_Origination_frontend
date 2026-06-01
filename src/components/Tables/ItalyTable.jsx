@@ -348,7 +348,7 @@ const ItalyTable = () => {
       state: { companyCodes: [selectedRow.original.codice_fiscale] },
     });
   };
-
+const [isDownloading, setIsDownloading] = useState(false);
   const table = useMaterialReactTable({
     columns,
     data,
@@ -384,26 +384,96 @@ const ItalyTable = () => {
       </IconButton>
     ),
     renderTopToolbarCustomActions: () => (
-      <button
-        onClick={handleFetchReports}
-        disabled={table.getSelectedRowModel().rows.length === 0}
-        style={{
-          padding: "10px 16px",
-          background: "#1976d2",
-          color: "white",
-          border: "none",
-          borderRadius: "6px",
-          cursor: "pointer",
-          fontWeight: "bold",
-        }}
-      >
-        Fetch Financial Reports
-      </button>
-    ),
+  <div
+    style={{
+      display: "flex",
+      gap: "10px",
+    }}
+  >
+    <button
+      onClick={handleFetchReports}
+      disabled={
+        table.getSelectedRowModel().rows.length === 0
+      }
+      style={{
+        padding: "10px 16px",
+        background: "#1976d2",
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontWeight: "bold",
+      }}
+    >
+      Fetch Financial Reports
+    </button>
+
+    <button
+      onClick={handleDownload}
+      disabled={
+        table.getSelectedRowModel().rows.length === 0 ||
+        isDownloading
+      }
+      style={{
+        padding: "10px 16px",
+        background: "#16a34a",
+        color: "white",
+        border: "none",
+        borderRadius: "6px",
+        cursor: "pointer",
+        fontWeight: "bold",
+      }}
+    >
+      {isDownloading
+        ? "Downloading..."
+        : "Download Report"}
+    </button>
+  </div>
+),
     muiToolbarAlertBannerProps: isError
       ? { color: "error", children: "Error loading data" }
       : undefined,
   });
+  const BASE_URL = "http://43.205.207.160:1701";
+
+const handleDownload = async () => {
+  try {
+    setIsDownloading(true);
+
+    const selectedRow =
+      table.getSelectedRowModel().rows[0];
+
+    if (!selectedRow) {
+      alert("Please select a company");
+      return;
+    }
+
+    const companyCode =
+      selectedRow.original.codice_fiscale;
+
+    const response = await fetch(
+      `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
+      {
+        method: "POST",
+      }
+    );
+
+    const data = await response.json();
+
+    const fileUrl = data?.s3_url;
+
+    if (!fileUrl) {
+      throw new Error("No file URL found");
+    }
+
+    window.open(fileUrl, "_blank");
+  } catch (error) {
+    console.error(error);
+    alert("Failed to download report");
+  } finally {
+    setIsDownloading(false);
+  }
+};
 
   // Leftover fields not covered by any group
   const otherEntries = selectedRowData
