@@ -58,18 +58,7 @@ const FIELD_GROUPS = [
       "codice_ateco_secondario", "attivita_prevalente",
     ],
   },
-  {
-    label: "Financials",
-    icon: <TrendingUpIcon fontSize="small" />,
-    accent: "#6a1b9a",
-    bg: "#f3e5f5",
-    keys: [
-      "ricavi_operativi_2024", "ebit_2024", "numero_dipendenti_2024",
-      "ricavi_operativi_2023", "ebit_2023", "numero_dipendenti_2023",
-      "utile_netto_2024", "utile_netto_2023",
-      "patrimonio_netto_2024", "patrimonio_netto_2023",
-    ],
-  },
+  
   {
     label: "Registry & Legal",
     icon: <AccountBalanceIcon fontSize="small" />,
@@ -137,7 +126,7 @@ const SectionCard = ({ group, data }) => {
     .filter(([, v]) => v !== null);
 
   if (entries.length === 0) return null;
-
+  
   return (
     <Box
       sx={{
@@ -171,39 +160,43 @@ const SectionCard = ({ group, data }) => {
       </Box>
 
       {/* Fields */}
-      <Box sx={{ p: 2 }}>
-        <Grid container spacing={1.5}>
-          {entries.map(([key, value]) => (
-            <Grid item xs={12} sm={6} key={key}>
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: "text.secondary",
-                    fontWeight: 600,
-                    textTransform: "uppercase",
-                    letterSpacing: 0.5,
-                    fontSize: "0.65rem",
-                  }}
-                >
-                  {fmtKey(key)}
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: 500,
-                    color: "text.primary",
-                    mt: 0.25,
-                    wordBreak: "break-word",
-                  }}
-                >
-                  {value}
-                </Typography>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
+      <Box sx={{ p: 0 }}>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+    }}
+  >
+    <tbody>
+      {entries.map(([key, value]) => (
+        <tr key={key}>
+          <td
+            style={{
+              padding: "10px 12px",
+              borderBottom: "1px solid #e0e0e0",
+              borderRight: "1px solid #d0d0d0",
+              fontWeight: 600,
+              width: "40%",
+              background: "#fafafa",
+            }}
+          >
+            {fmtKey(key)}
+          </td>
+
+          <td
+            style={{
+              padding: "10px 12px",
+              borderBottom: "1px solid #e0e0e0",
+            }}
+          >
+            {value}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</Box>
+      
     </Box>
   );
 };
@@ -219,6 +212,10 @@ const ItalyTable = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
+  const [reportData, setReportData] = useState(null);
+  const shareholders =
+  reportData?.data?.related_data?.italy_company_shareholders || [];
+
 
   const [columnFilters, setColumnFilters] = useState([]);
 
@@ -336,12 +333,28 @@ const ItalyTable = () => {
 
   const handleRowSelection = (rowId) => setRowSelection({ [rowId]: true });
 
-  const handleInfoClick = (row) => {
-    setSelectedRowData(row.original);
-    setModalOpen(true);
-  };
+  const handleInfoClick = async (row) => {
+  try {
+    const companyCode =
+      row.original.codice_fiscale;
 
+    const response = await fetch(
+      `http://43.205.207.160:1701/api/italy/company/${companyCode}`
+    );
+
+    const data = await response.json();
+    console.log("REPORT DATA:", data);
+
+    setSelectedRowData(row.original);
+    setReportData(data);
+
+    setModalOpen(true);
+  } catch (error) {
+    console.error(error);
+  }
+};
   const handleFetchReports = () => {
+
     const selectedRow = table.getSelectedRowModel().rows[0];
     if (!selectedRow) return;
     navigate("/italy-reports", {
@@ -481,6 +494,187 @@ const handleDownload = async () => {
         ([k, v]) => !ALL_GROUPED_KEYS.has(k) && !HEADER_KEYS.has(k) && fmtValue(v) !== null
       )
     : [];
+    const thStyle = {
+  padding: "14px 16px",
+  background: "#f8fafc",
+  borderBottom: "2px solid #dbeafe",
+  color: "#1e293b",
+  fontWeight: "700",
+  textAlign: "left",
+  fontSize: "14px",
+};
+  const tdStyle = {
+  padding: "13px 16px",
+  borderBottom: "1px solid #edf2f7",
+  color: "#334155",
+  fontSize: "14px",
+  background: "#ffffff",
+};
+  const renderYearData = (obj) =>
+  years.map((year) => (
+    <td key={year} style={tdStyle}>
+      {obj?.[year] != null
+        ? Number(obj[year]).toLocaleString("en-US")
+        : "-"}
+    </td>
+  ));
+  const people =
+  reportData?.data?.related_data?.italy_company_people || [];
+  const assetsData =
+  reportData?.data?.related_data?.italy_company_assets || [];
+  
+
+  const assetsTableData = {
+  intangibleAssets: {},
+  tangibleAssets: {},
+  totalFixedAssets: {},
+  totalReceivables: {},
+  receivables12Months: {},
+  cashEquivalents: {},
+  currentAssets: {},
+  accruedAssets: {},
+  totalAssets: {},
+};
+assetsData.forEach((item) => {
+  const year = item.financial_year;
+
+  assetsTableData.intangibleAssets[year] =
+    item.immobilizzazioni_immateriali;
+
+  assetsTableData.tangibleAssets[year] =
+    item.immobilizzazioni_materiali;
+
+  assetsTableData.totalFixedAssets[year] =
+    item.totale_immobilizzazioni;
+
+  assetsTableData.totalReceivables[year] =
+    item.totale_crediti;
+
+  assetsTableData.receivables12Months[year] =
+    item.crediti_entro_12_mesi;
+
+  assetsTableData.cashEquivalents[year] =
+    item.disponibilita_liquide;
+
+  assetsTableData.currentAssets[year] =
+    item.attivo_circolante;
+
+  assetsTableData.accruedAssets[year] =
+    item.ratei_risconti_attivi;
+
+  assetsTableData.totalAssets[year] =
+    item.totale_attivo;
+});
+const liabilitiesData =
+  reportData?.data?.related_data?.italy_company_liabilities || [];
+
+const liabilitiesTableData = {
+  netWorth: {},
+  shareCapital: {},
+  reserves: {},
+  retainedEarnings: {},
+  provisions: {},
+  employeeSeveranceFund: {},
+  totalPayables: {},
+  payables12Months: {},
+  accruedLiabilities: {},
+  totalLiabilities: {},
+};
+liabilitiesData.forEach((item) => {
+  const year = item.financial_year;
+
+  liabilitiesTableData.netWorth[year] =
+    item.patrimonio_netto;
+
+  liabilitiesTableData.shareCapital[year] =
+    item.capitale_sociale;
+
+  liabilitiesTableData.reserves[year] =
+    item.riserve;
+
+  liabilitiesTableData.retainedEarnings[year] =
+    item.utile_perdita_portato_a_nuovo;
+
+  liabilitiesTableData.provisions[year] =
+    item.fondi_rischi_oneri;
+
+  liabilitiesTableData.employeeSeveranceFund[year] =
+    item.trattamento_fine_rapporto;
+
+  liabilitiesTableData.totalPayables[year] =
+    item.totale_debiti;
+
+  liabilitiesTableData.payables12Months[year] =
+    item.debiti_entro_12_mesi;
+
+  liabilitiesTableData.accruedLiabilities[year] =
+    item.ratei_risconti_passivi;
+
+  liabilitiesTableData.totalLiabilities[year] =
+    item.totale_passivo;
+});
+    const incomeStatement =
+  reportData?.data?.related_data?.italy_company_balance_sheet || [];
+const years = [...new Set(
+  incomeStatement.map((item) => String(item.financial_year))
+)].sort((a, b) => a - b);
+const incomeData = {
+  operatingRevenue: {},
+  otherRevenue: {},
+  totalProductionValue: {},
+  totalProductionCost: {},
+  purchaseCost: {},
+  serviceCost: {},
+  thirdPartyAssetCost: {},
+  employeeCost: {},
+  otherOperatingExpenses: {},
+  ebitda: {},
+  depreciation: {},
+  ebit: {},
+  financialCharges: {},
+  profitBeforeTax: {},
+  tax: {},
+  netProfit: {},
+  cashFlow: {},
+};
+
+incomeStatement.forEach((item) => {
+  const year = item.financial_year;
+
+  incomeData.operatingRevenue[year] = item.ricavi_operativi;
+  incomeData.otherRevenue[year] = item.ricavi_e_proventi;
+  incomeData.totalProductionValue[year] =
+    item.totale_valore_produzione;
+  incomeData.totalProductionCost[year] =
+    item.totale_costi_produzione;
+  incomeData.purchaseCost[year] =
+    item.costo_per_acquisti;
+  incomeData.serviceCost[year] =
+    item.costo_per_servizi;
+  incomeData.thirdPartyAssetCost[year] =
+    item.costo_per_godimento_beni_terzi;
+  incomeData.employeeCost[year] =
+    item.costo_personale;
+  incomeData.otherOperatingExpenses[year] =
+    item.oneri_diversi_gestione;
+  incomeData.ebitda[year] =
+    item.ebitda;
+  incomeData.depreciation[year] =
+    item.ammortamenti_svalutazioni;
+  incomeData.ebit[year] =
+    item.ebit;
+  incomeData.financialCharges[year] =
+    item.proventi_oneri_finanziari;
+  incomeData.profitBeforeTax[year] =
+    item.risultato_prima_imposte;
+  incomeData.tax[year] =
+    item.imposte_reddito;
+  incomeData.netProfit[year] =
+    item.utile_perdita_esercizio;
+  incomeData.cashFlow[year] =
+    item.flusso_di_cassa;
+});
+
 
   return (
     <>
@@ -566,6 +760,7 @@ const handleDownload = async () => {
           </Box>
         )}
 
+
         {/* ── Key metrics strip ── */}
         {selectedRowData && (
           <Box
@@ -614,6 +809,7 @@ const handleDownload = async () => {
             })}
           </Box>
         )}
+        
 
         {/* ── Scrollable sections ── */}
         <DialogContent
@@ -631,62 +827,530 @@ const handleDownload = async () => {
             ))}
 
           {/* Overflow / ungrouped fields */}
-          {otherEntries.length > 0 && (
-            <Box
-              sx={{
-                border: "1px solid #e0e0e0",
-                borderLeft: "4px solid #757575",
-                borderRadius: "8px",
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  px: 2, py: 1,
-                  background: "#f5f5f5",
-                  borderBottom: "1px solid #e0e0e0",
+
+          {people.length > 0 && (
+  <Box
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderLeft: "4px solid #1565c0",
+    borderRadius: "8px",
+    overflow: "hidden",
+    mb: 2,
+    mt: 2,
+  }}
+>
+    <Box
+      sx={{
+        px: 2,
+        py: 1,
+        background: "#1976d2",
+      }}
+    >
+     <Typography
+  variant="caption"
+  fontWeight={700}
+  sx={{
+   color: "#ffffff",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  }}
+>
+        Management Team
+      </Typography>
+    </Box>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Full Name</th>
+          <th style={thStyle}>Role</th>
+          <th style={thStyle}>Category</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {people.map((person, index) => (
+          <tr key={index}>
+            <td style={tdStyle}>
+              {person.full_name}
+            </td>
+
+            <td style={tdStyle}>
+              {person.role_name}
+            </td>
+
+            <td style={tdStyle}>
+              {person.category}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </Box>
+)}
+
+{shareholders.length > 0 && (
+  <Box
+  sx={{
+    mt: 3,
+    border: "1px solid #e0e0e0",
+    borderLeft: "4px solid #1565c0",
+    borderRadius: "8px",
+    overflow: "hidden",
+  }}
+>
+    <Box
+      sx={{
+        px: 2,
+        py: 1,
+        background: "#1976d2",
+      }}
+    >
+      <Typography
+        sx={{
+          color: "#fff",
+          fontWeight: 700,
+        }}
+      >
+        Shareholders
+      </Typography>
+    </Box>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Shareholder Name</th>
+          <th style={thStyle}>Ownership %</th>
+          <th style={thStyle}>Nominal Value</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {shareholders.map((item, index) => (
+          <tr key={index}>
+            <td style={tdStyle}>
+              {item.shareholder_name || "-"}
+            </td>
+
+            <td style={tdStyle}>
+              {item.ownership_percentage || "-"}
+            </td>
+
+            <td style={tdStyle}>
+              {item.nominal_value
+                ? Number(item.nominal_value).toLocaleString("en-US")
+                : "-"}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </Box>
+)}
+          <h2
+        style={{
+          padding: "18px 22px",
+          margin: 0,
+          background:
+            "linear-gradient(90deg, #1e3a8a, #2563eb)",
+          color: "#ffffff",
+          fontSize: "20px",
+          fontWeight: "700",
+          letterSpacing: "0.3px",
+          marginTop: "20px",
+        }}
+      >
+        Income Statement (Conto Economico) - EUR (€)
+      </h2>
+
+      <div style={{ overflowX: "auto" }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            minWidth: "900px",
+            fontSize: "14px",
+          }}
+        >
+          <thead>
+            <tr>
+              <th
+                style={{
+                  ...thStyle,
+                  width: "280px",
                 }}
               >
-                <Typography
-                  variant="caption"
-                  fontWeight={700}
-                  sx={{ color: "#616161", textTransform: "uppercase", letterSpacing: 1 }}
-                >
-                  Other Details
-                </Typography>
-              </Box>
-              <Box sx={{ p: 2 }}>
-                <Grid container spacing={1.5}>
-                  {otherEntries.map(([key, value]) => (
-                    <Grid item xs={12} sm={6} key={key}>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          color: "text.secondary",
-                          fontWeight: 600,
-                          textTransform: "uppercase",
-                          letterSpacing: 0.5,
-                          fontSize: "0.65rem",
-                        }}
-                      >
-                        {fmtKey(key)}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 500, mt: 0.25, wordBreak: "break-word" }}
-                      >
-                        {fmtValue(value)}
-                      </Typography>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Box>
-            </Box>
+                Financial Item
+              </th>
+
+              {years.map((year) => (
+                <th key={year} style={thStyle}>
+                  {year}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td style={tdStyle}>Operating Revenue</td>
+              {renderYearData(incomeData.operatingRevenue)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Other Revenue</td>
+              {renderYearData(incomeData.otherRevenue)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Total Production Value</td>
+              {renderYearData(
+                incomeData.totalProductionValue
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Total Production Cost</td>
+              {renderYearData(
+                incomeData.totalProductionCost
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Purchase Cost</td>
+              {renderYearData(incomeData.purchaseCost)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Service Cost</td>
+              {renderYearData(incomeData.serviceCost)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>
+                Third-party Asset Cost
+              </td>
+              {renderYearData(
+                incomeData.thirdPartyAssetCost
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Employee Cost</td>
+              {renderYearData(incomeData.employeeCost)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>
+                Other Operating Expenses
+              </td>
+              {renderYearData(
+                incomeData.otherOperatingExpenses
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>EBITDA</td>
+              {renderYearData(incomeData.ebitda)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>
+                Depreciation & Amortization
+              </td>
+              {renderYearData(incomeData.depreciation)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>EBIT</td>
+              {renderYearData(incomeData.ebit)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>
+                Financial Income / Charges
+              </td>
+              {renderYearData(
+                incomeData.financialCharges
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Profit Before Tax</td>
+              {renderYearData(
+                incomeData.profitBeforeTax
+              )}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Tax</td>
+              {renderYearData(incomeData.tax)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Net Profit / Loss</td>
+              {renderYearData(incomeData.netProfit)}
+            </tr>
+
+            <tr>
+              <td style={tdStyle}>Cash Flow</td>
+              {renderYearData(incomeData.cashFlow)}
+            </tr>
+          </tbody>
+</table>
+</div>
+<h2
+    style={{
+      padding: "18px 22px",
+      margin: 0,
+      background:
+        "linear-gradient(90deg, #1e3a8a, #2563eb)",
+      color: "#ffffff",
+      fontSize: "20px",
+      fontWeight: "700",
+    }}
+  >
+    Balance Sheet Assets • EUR (€)
+  </h2>
+
+  <div style={{ overflowX: "auto" }}>
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        minWidth: "900px",
+        fontSize: "14px",
+      }}
+    >
+      <thead>
+        <tr>
+          <th
+            style={{
+              ...thStyle,
+              width: "280px",
+            }}
+          >
+            Financial Item
+          </th>
+
+          {years.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td style={tdStyle}>Intangible Assets</td>
+          {renderYearData(
+            assetsTableData.intangibleAssets
           )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Tangible Assets</td>
+          {renderYearData(
+            assetsTableData.tangibleAssets
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Total Fixed Assets</td>
+          {renderYearData(
+            assetsTableData.totalFixedAssets
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Total Receivables</td>
+          {renderYearData(
+            assetsTableData.totalReceivables
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Receivables within 12 Months
+          </td>
+          {renderYearData(
+            assetsTableData.receivables12Months
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Cash & Cash Equivalents
+          </td>
+          {renderYearData(
+            assetsTableData.cashEquivalents
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Current Assets</td>
+          {renderYearData(
+            assetsTableData.currentAssets
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Accrued Assets</td>
+          {renderYearData(
+            assetsTableData.accruedAssets
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Total Assets</td>
+          {renderYearData(
+            assetsTableData.totalAssets
+          )}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <h2
+    style={{
+      padding: "18px 22px",
+      margin: 0,
+      background:
+        "linear-gradient(90deg, #1e3a8a, #2563eb)",
+      color: "#ffffff",
+      fontSize: "20px",
+      fontWeight: "700",
+    }}
+  >
+    Balance Sheet Liabilities • EUR (€)
+  </h2>
+
+  <div style={{ overflowX: "auto" }}>
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+        minWidth: "900px",
+        fontSize: "14px",
+      }}
+    >
+      <thead>
+        <tr>
+          <th
+            style={{
+              ...thStyle,
+              width: "280px",
+            }}
+          >
+            Financial Item
+          </th>
+
+          {years.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td style={tdStyle}>Equity / Net Worth</td>
+          {renderYearData(
+            liabilitiesTableData.netWorth
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Share Capital</td>
+          {renderYearData(
+            liabilitiesTableData.shareCapital
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Reserves</td>
+          {renderYearData(
+            liabilitiesTableData.reserves
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Retained Earnings / Profit
+          </td>
+          {renderYearData(
+            liabilitiesTableData.retainedEarnings
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Provisions</td>
+          {renderYearData(
+            liabilitiesTableData.provisions
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Employee Severance Fund
+          </td>
+          {renderYearData(
+            liabilitiesTableData.employeeSeveranceFund
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Total Payables</td>
+          {renderYearData(
+            liabilitiesTableData.totalPayables
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Payables within 12 Months
+          </td>
+          {renderYearData(
+            liabilitiesTableData.payables12Months
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>
+            Accrued Liabilities
+          </td>
+          {renderYearData(
+            liabilitiesTableData.accruedLiabilities
+          )}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Total Liabilities</td>
+          {renderYearData(
+            liabilitiesTableData.totalLiabilities
+          )}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
         </DialogContent>
       </Dialog>
     </>
   );
 };
+
 
 export default ItalyTable;

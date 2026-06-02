@@ -155,7 +155,7 @@ console.log("DOWNLOAD API:", data);
           height: "55px",
           border: "5px solid #dbeafe",
           borderTop: "5px solid #2563eb",
-          borderRadius: "50%",
+          borderRadius: "50%", 
           animation: "spin 1s linear infinite",
         }}
       />
