@@ -40,7 +40,7 @@ const Step1 = ({ onNext }) => {
               className="btn btn-primary w-100 next-btn"
               id="nextToFilters"
               onClick={() => onNext(selectedRegion)}
-              disabled={!selectedRegion}
+              disabled={!selectedRegion} 
             >
               Next
             </button>

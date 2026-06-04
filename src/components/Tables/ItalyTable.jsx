@@ -213,6 +213,38 @@ const ItalyTable = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [reportData, setReportData] = useState(null);
+  const [scheduleDialogOpen, setScheduleDialogOpen] =
+  useState(false);
+
+const [selectedSchedules, setSelectedSchedules] =
+  useState([]);
+  const SCHEDULES = [
+  { code: "05", label: "Company Overview" },
+  { code: "10", label: "Financial Statement (Income Statement)" },
+  { code: "20", label: "Assets Balance Sheet" },
+  { code: "30", label: "Liabilities Balance Sheet" },
+  { code: "40", label: "Financial Ratios & Indicators" },
+  { code: "50", label: "Profitability Analysis" },
+  { code: "60", label: "Productivity Analysis" },
+  { code: "70", label: "Growth Analysis" },
+  {
+    code: "85",
+    label: "Contacts, Shareholders, Executives & CEO",
+  },
+  {
+    code: "ANA",
+    label: "Company Registry Information",
+  },
+  {
+    code: "PROT",
+    label: "Protests & Negative Records",
+  },
+  {
+    code: "CR",
+    label: "Credit Score & Rating",
+  },
+];
+
   const shareholders =
   reportData?.data?.related_data?.italy_company_shareholders || [];
 
@@ -353,14 +385,63 @@ const ItalyTable = () => {
     console.error(error);
   }
 };
-  const handleFetchReports = () => {
+ const handleFetchReports = () => {
+  const selectedRow =
+    table.getSelectedRowModel().rows[0];
 
-    const selectedRow = table.getSelectedRowModel().rows[0];
+  if (!selectedRow) return;
+
+  setScheduleDialogOpen(true);
+};
+const handleScheduleToggle = (code) => {
+  setSelectedSchedules((prev) =>
+    prev.includes(code)
+      ? prev.filter((item) => item !== code)
+      : [...prev, code]
+  );
+};
+const handleGenerateReport = async () => {
+  try {
+    const selectedRow =
+      table.getSelectedRowModel().rows[0];
+
     if (!selectedRow) return;
-    navigate("/italy-reports", {
-      state: { companyCodes: [selectedRow.original.codice_fiscale] },
+
+    const companyCode =
+      selectedRow.original.codice_fiscale;
+
+    const params = new URLSearchParams();
+
+    selectedSchedules.forEach((schedule) => {
+      params.append("schedules", schedule);
     });
-  };
+
+    const response = await fetch(
+      `${BASE_URL}/api/italy/company/${companyCode}?${params.toString()}`,
+      {
+        method: "POST",
+      }
+    );
+
+    const data = await response.json();
+
+    console.log("REPORT RESPONSE", data);
+    console.log(
+  "Selected Schedules Before Navigate:",
+  selectedSchedules
+);
+navigate("/italy-reports", {
+  state: {
+    companyCodes: [companyCode],
+    schedules: selectedSchedules,
+    reportData: data,
+  },
+});
+    setScheduleDialogOpen(false);
+  } catch (error) {
+    console.error(error);
+  }
+};
 const [isDownloading, setIsDownloading] = useState(false);
   const table = useMaterialReactTable({
     columns,
@@ -1343,12 +1424,131 @@ incomeStatement.forEach((item) => {
         </tr>
       </tbody>
     </table>
+    
   </div>
 
 
         </DialogContent>
       </Dialog>
+      <Dialog
+  open={scheduleDialogOpen}
+  onClose={() => setScheduleDialogOpen(false)}
+  maxWidth="md"
+  fullWidth
+>
+  <Box
+    sx={{
+      background:
+        "linear-gradient(135deg,#0f172a,#1e3a8a)",
+      color: "#fff",
+      p: 3,
+    }}
+  >
+    <Typography variant="h5" fontWeight={700}>
+      Generate Custom Financial Report
+    </Typography>
+
+    <Typography sx={{ mt: 1, opacity: 0.9 }}>
+      Select the schedules you would like
+      to include in the report.
+    </Typography>
+  </Box>
+
+  <DialogContent sx={{ p: 3 }}>
+    {SCHEDULES.map((item) => (
+      <Box
+        key={item.code}
+        onClick={() =>
+          handleScheduleToggle(item.code)
+        }
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          p: 2,
+          mb: 1.5,
+          borderRadius: 2,
+          cursor: "pointer",
+          border: selectedSchedules.includes(
+            item.code
+          )
+            ? "2px solid #2563eb"
+            : "1px solid #e5e7eb",
+          background:
+            selectedSchedules.includes(item.code)
+              ? "#eff6ff"
+              : "#ffffff",
+          transition: "0.2s",
+        }}
+      >
+        <Chip
+          label={item.code}
+          sx={{
+            background: "#2563eb",
+            color: "#fff",
+            fontWeight: 700,
+          }}
+        />
+
+        <Typography>
+          {item.label}
+        </Typography>
+      </Box>
+    ))}
+
+    <Box
+      sx={{
+        mt: 3,
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <Typography fontWeight={600}>
+        {selectedSchedules.length}
+        {" "}Schedule(s) Selected
+      </Typography>
+
+      <Box>
+        <button
+          onClick={() =>
+            setScheduleDialogOpen(false)
+          }
+          style={{
+            padding: "10px 18px",
+            marginRight: "10px",
+            border: "1px solid #d1d5db",
+            borderRadius: "6px",
+            background: "#fff",
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={handleGenerateReport}
+          disabled={
+            selectedSchedules.length === 0
+          }
+          style={{
+            padding: "10px 18px",
+            border: "none",
+            borderRadius: "6px",
+            background: "#2563eb",
+            color: "#fff",
+            cursor: "pointer",
+            fontWeight: "bold",
+          }}
+        >
+          Generate Report
+        </button>
+      </Box>
+    </Box>
+  </DialogContent>
+</Dialog>
     </>
+    
   );
 };
 

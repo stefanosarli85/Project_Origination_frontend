@@ -8,7 +8,10 @@ const ItalyReportsPage = () => {
     () => location.state?.companyCodes || [],
     [location.state?.companyCodes]
   );
+const schedules =
+  location.state?.schedules || [];
 
+console.log("Selected Schedules:", schedules);
   const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
@@ -224,19 +227,23 @@ console.log("DOWNLOAD API:", data);
   fontSize: "14px",
   background: "#ffffff",
 };
-  const renderYearData = (obj) =>
-  years.map((year) => (
+const scheduleReportData =
+  location.state?.reportData || null;
+
+console.log(
+  "SCHEDULE API RESPONSE",
+  scheduleReportData
+);
+const renderYearData = (obj, yearsArray) =>
+  yearsArray.map((year) => (
     <td key={year} style={tdStyle}>
       {obj?.[year] != null
         ? Number(obj[year]).toLocaleString("en-US")
         : "-"}
     </td>
   ));
-    const incomeStatement =
-  reportData?.data?.related_data?.italy_company_balance_sheet || [];
-const years = [...new Set(
-  incomeStatement.map((item) => String(item.financial_year))
-)].sort((a, b) => a - b);
+   
+
 const incomeData = {
   operatingRevenue: {},
   otherRevenue: {},
@@ -256,45 +263,64 @@ const incomeData = {
   netProfit: {},
   cashFlow: {},
 };
+const schedule10 =
+  scheduleReportData?.data?.["10"] || {};
+const schedule10Years = Object.keys(schedule10)
+  .sort((a, b) => a - b);
+Object.entries(schedule10).forEach(
+  ([year, item]) => {
+    incomeData.operatingRevenue[year] =
+      item.RICAVI_OPERATIVI;
 
-incomeStatement.forEach((item) => {
-  const year = item.financial_year;
+    incomeData.otherRevenue[year] =
+      item.RICAVI_E_PROVENTI;
 
-  incomeData.operatingRevenue[year] = item.ricavi_operativi;
-  incomeData.otherRevenue[year] = item.ricavi_e_proventi;
-  incomeData.totalProductionValue[year] =
-    item.totale_valore_produzione;
-  incomeData.totalProductionCost[year] =
-    item.totale_costi_produzione;
-  incomeData.purchaseCost[year] =
-    item.costo_per_acquisti;
-  incomeData.serviceCost[year] =
-    item.costo_per_servizi;
-  incomeData.thirdPartyAssetCost[year] =
-    item.costo_per_godimento_beni_terzi;
-  incomeData.employeeCost[year] =
-    item.costo_personale;
-  incomeData.otherOperatingExpenses[year] =
-    item.oneri_diversi_gestione;
-  incomeData.ebitda[year] =
-    item.ebitda;
-  incomeData.depreciation[year] =
-    item.ammortamenti_svalutazioni;
-  incomeData.ebit[year] =
-    item.ebit;
-  incomeData.financialCharges[year] =
-    item.proventi_oneri_finanziari;
-  incomeData.profitBeforeTax[year] =
-    item.risultato_prima_imposte;
-  incomeData.tax[year] =
-    item.imposte_reddito;
-  incomeData.netProfit[year] =
-    item.utile_perdita_esercizio;
-  incomeData.cashFlow[year] =
-    item.flusso_di_cassa;
-});
-const assetsData =
-  reportData?.data?.related_data?.italy_company_assets || [];
+    incomeData.totalProductionValue[year] =
+      item.TOTALE_VALORE_DELLA_PRODUZIONE;
+
+    incomeData.totalProductionCost[year] =
+      item.TOTALE_COSTI_DELLA_PRODUZIONE;
+
+    incomeData.purchaseCost[year] =
+      item.COSTO_PER_ACQUISTI;
+
+    incomeData.serviceCost[year] =
+      item.COSTO_PER_SERVIZI;
+
+    incomeData.thirdPartyAssetCost[year] =
+      item.COSTO_PER_GODIMENTO_DI_BENI_DI_TERZI;
+
+    incomeData.employeeCost[year] =
+      item.COSTO_DEL_PERSONALE;
+
+    incomeData.otherOperatingExpenses[year] =
+      item.ONERI_DIVERSI_DI_GESTIONE;
+
+    incomeData.ebitda[year] =
+      item.MARGINE_OPERATIVO_LORDO_EBITDA;
+
+    incomeData.depreciation[year] =
+      item.AMMORTAMENTI_E_SVALUTAZIONI;
+
+    incomeData.ebit[year] =
+      item.RISULTATO_OPERATIVO_EBIT;
+
+    incomeData.financialCharges[year] =
+      item.PROVENTI_E_ONERI_FINANZIARI;
+
+    incomeData.profitBeforeTax[year] =
+      item.RISULTATO_PRIMA_DELLE_IMPOSTE;
+
+    incomeData.tax[year] =
+      item.IMPOSTE_SUL_REDDITO_ESERCIZIO;
+
+    incomeData.netProfit[year] =
+      item.UTILE_PERDITA_ESERCIZIO;
+
+    incomeData.cashFlow[year] =
+      item.FLUSSO_DI_CASSA;
+  }
+);
 
 const assetsTableData = {
   intangibleAssets: {},
@@ -308,38 +334,40 @@ const assetsTableData = {
   totalAssets: {},
 };
 
-assetsData.forEach((item) => {
-  const year = item.financial_year;
+const schedule20 =
+  scheduleReportData?.data?.["20"] || {};
+  const schedule20Years = Object.keys(schedule20)
+  .sort((a, b) => a - b);
+  Object.entries(schedule20).forEach(
+  ([year, item]) => {
+    assetsTableData.intangibleAssets[year] =
+      item.IMMOBILIZZAZIONI_IMMATERIALI;
 
-  assetsTableData.intangibleAssets[year] =
-    item.immobilizzazioni_immateriali;
+    assetsTableData.tangibleAssets[year] =
+      item.IMMOBILIZZAZIONI_MATERIALI;
 
-  assetsTableData.tangibleAssets[year] =
-    item.immobilizzazioni_materiali;
+    assetsTableData.totalFixedAssets[year] =
+      item.TOTALE_IMMOBILIZZAZIONI;
 
-  assetsTableData.totalFixedAssets[year] =
-    item.totale_immobilizzazioni;
+    assetsTableData.totalReceivables[year] =
+      item.TOTALE_CREDITI;
 
-  assetsTableData.totalReceivables[year] =
-    item.totale_crediti;
+    assetsTableData.receivables12Months[year] =
+      item.CREDITI_ENTRO_12_MESI;
 
-  assetsTableData.receivables12Months[year] =
-    item.crediti_entro_12_mesi;
+    assetsTableData.cashEquivalents[year] =
+      item.TOTALE_DISPONIBILITA_LIQUIDE;
 
-  assetsTableData.cashEquivalents[year] =
-    item.totale_disponibilita_liquide;
+    assetsTableData.currentAssets[year] =
+      item.TOTALE_ATTIVO_CIRCOLANTE;
 
-  assetsTableData.currentAssets[year] =
-    item.totale_attivo_circolante;
+    assetsTableData.accruedAssets[year] =
+      item.RATEI_E_RISCONTI_ATTIVI;
 
-  assetsTableData.accruedAssets[year] =
-    item.ratei_risconti_attivi;
-
-  assetsTableData.totalAssets[year] =
-    item.totale_attivo;
-});
-const liabilitiesData =
-  reportData?.data?.related_data?.italy_company_liabilities || [];
+    assetsTableData.totalAssets[year] =
+      item.TOTALE_ATTIVO;
+  }
+);
 
 const liabilitiesTableData = {
   netWorth: {},
@@ -353,41 +381,183 @@ const liabilitiesTableData = {
   accruedLiabilities: {},
   totalLiabilities: {},
 };
+const ratioData = {
+  roe: {},
+  roi: {},
+  ros: {},
+  currentRatio: {},
+  quickRatio: {},
+  netFinancialPosition: {},
+  revenueGrowth: {},
+  productionGrowth: {},
+  netWorthGrowth: {},
+  assetsGrowth: {},
+};
+const profitabilityData = {
+  profit: {},
+  employeeCost: {},
+  employees: {},
+};
+const productivityData = {
+  revenue: {},
+  employeeCost: {},
+  employees: {},
+};
+const growthData = {
+  profit: {},
+  revenue: {},
+  employeeCost: {},
+  employees: {},
+};
+const schedule30 =
+  scheduleReportData?.data?.["30"] || {};
+  const schedule30Years = Object.keys(schedule30)
+  .sort((a, b) => a - b);
+  Object.entries(schedule30).forEach(
+  ([year, item]) => {
+    liabilitiesTableData.netWorth[year] =
+      item.patrimonio_netto;
 
-liabilitiesData.forEach((item) => {
-  const year = item.financial_year;
+    liabilitiesTableData.shareCapital[year] =
+      item.capitale_sociale;
 
-  liabilitiesTableData.netWorth[year] =
-    item.patrimonio_netto;
+    liabilitiesTableData.reserves[year] =
+      item.altre_riserve;
 
-  liabilitiesTableData.shareCapital[year] =
-    item.capitale_sociale;
+    liabilitiesTableData.retainedEarnings[year] =
+      item.utile_perdita_esercizio;
 
-  liabilitiesTableData.reserves[year] =
-    item.riserve;
+    liabilitiesTableData.provisions[year] =
+      0;
 
-  liabilitiesTableData.retainedEarnings[year] =
-    item.utile_perdita_portato;
+    liabilitiesTableData.employeeSeveranceFund[year] =
+      item.fondo_tfr;
 
-  liabilitiesTableData.provisions[year] =
-    item.fondi_rischi_oneri;
+    liabilitiesTableData.totalPayables[year] =
+      item.totale_debiti;
 
-  liabilitiesTableData.employeeSeveranceFund[year] =
-    item.trattamento_fine_rapporto;
+    liabilitiesTableData.payables12Months[year] =
+      item.debiti_entro_12_mesi;
 
-  liabilitiesTableData.totalPayables[year] =
-    item.totale_debiti;
+    liabilitiesTableData.accruedLiabilities[year] =
+      item.ratei_risconti_passivi;
 
-  liabilitiesTableData.payables12Months[year] =
-    item.debiti_entro_12_mesi;
+    liabilitiesTableData.totalLiabilities[year] =
+      item.totale_passivo;
+  }
+);
+const schedule40 =
+  scheduleReportData?.data?.["40"] || {};
+  const ratioYears = Object.keys(schedule40)
+  .sort((a, b) => a - b);
+  Object.entries(schedule40).forEach(
+  ([year, item]) => {
+    ratioData.roe[year] = item.perc_roe;
+    ratioData.roi[year] = item.perc_roi;
+    ratioData.ros[year] = item.perc_ros;
 
-  liabilitiesTableData.accruedLiabilities[year] =
-    item.ratei_risconti_passivi;
+    ratioData.currentRatio[year] =
+      item.indice_disponibilita;
 
-  liabilitiesTableData.totalLiabilities[year] =
-    item.totale_passivo;
-});
+    ratioData.quickRatio[year] =
+      item.indice_liquidita_immediata;
 
+    ratioData.netFinancialPosition[year] =
+      item.pfn;
+
+    ratioData.revenueGrowth[year] =
+      item.perc_variazione_ricavi;
+
+    ratioData.productionGrowth[year] =
+      item.perc_variazione_valore_produzione;
+
+    ratioData.netWorthGrowth[year] =
+      item.perc_variazione_patrimonio_netto;
+
+    ratioData.assetsGrowth[year] =
+      item.perc_variazione_attivo;
+  }
+);
+const schedule50 =
+  scheduleReportData?.data?.["50"] || {};
+  const profitabilityYears = Object.keys(
+  schedule50 || {}
+).sort((a, b) => Number(a) - Number(b));
+Object.entries(schedule50).forEach(
+  ([year, item]) => {
+    profitabilityData.profit[year] =
+      item.utile;
+
+    profitabilityData.employeeCost[year] =
+      item.costo_personale;
+
+    profitabilityData.employees[year] =
+      item.dipendenti;
+  }
+);
+const schedule60 =
+  scheduleReportData?.data?.["60"] || {};
+  const productivityYears = Object.keys(
+  schedule60 || {}
+).sort((a, b) => Number(a) - Number(b));
+Object.entries(schedule60).forEach(
+  ([year, item]) => {
+    productivityData.revenue[year] =
+      item.fatturato;
+
+    productivityData.employeeCost[year] =
+      item.costo_personale;
+
+    productivityData.employees[year] =
+      item.dipendenti;
+  }
+);
+const schedule70 =
+  scheduleReportData?.data?.["70"] || {};
+  const growthYears = Object.keys(
+  schedule70 || {}
+).sort((a, b) => Number(a) - Number(b));
+Object.entries(schedule70).forEach(
+  ([year, item]) => {
+    growthData.profit[year] =
+      item.utile;
+
+    growthData.revenue[year] =
+      item.fatturato;
+
+    growthData.employeeCost[year] =
+      item.costo_personale;
+
+    growthData.employees[year] =
+      item.dipendenti;
+  }
+);
+const scheduleANA =
+  scheduleReportData?.data?.["ANA"] || {};
+  const schedulePROT =
+  scheduleReportData?.data?.["PROT"] || {};
+const schedule05 =
+  scheduleReportData?.data?.["05"] || {};
+  const schedule85 =
+  scheduleReportData?.data?.["85"] || {};
+
+const contacts =
+  schedule85?.contatti || {};
+
+const shareholders =
+  schedule85?.soci || [];
+
+const managementTeam = [
+  ...(schedule85?.ceo_amministratori || []),
+  ...(schedule85?.esponenti || []),
+];
+const scheduleCR =
+  scheduleReportData?.data?.["CR"];
+const schedule05Years =
+  Object.keys(schedule05).sort((a, b) => b - a);
+  
+console.log("SCHEDULE05", schedule05);
+console.log("YEARS", schedule05Years);
 
  return (
   <div
@@ -463,16 +633,330 @@ liabilitiesData.forEach((item) => {
     )}
   </button>
 </div>
-    <div
+
+
+{schedules.includes("05") && (
+  <div
+    style={{
+      marginTop: "20px",
+      background: "#ffffff",
+      borderRadius: "14px",
+      overflow: "hidden",
+      boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+      border: "1px solid #e5e7eb",
+    }}
+  >
+    <h2
       style={{
-        marginTop: "20px",
-        background: "#ffffff",
-        borderRadius: "14px",
-        overflow: "hidden",
-        boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
-        border: "1px solid #e5e7eb",
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
       }}
     >
+      Company Overview
+    </h2>
+
+    <div style={{ overflowX: "auto" }}>
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={thStyle}>Year</th>
+        <th style={thStyle}>Revenue</th>
+        <th style={thStyle}>Profit</th>
+        <th style={thStyle}>Employee Cost</th>
+        <th style={thStyle}>Employees</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {schedule05Years.map((year) => (
+        <tr key={year}>
+          <td style={tdStyle}>{year}</td>
+
+          <td style={tdStyle}>
+            {schedule05[year]?.fatturato?.toLocaleString() || "-"}
+          </td>
+
+          <td style={tdStyle}>
+            {schedule05[year]?.utile?.toLocaleString() || "-"}
+          </td>
+
+          <td style={tdStyle}>
+            {schedule05[year]?.costo_personale?.toLocaleString() || "-"}
+          </td>
+
+          <td style={tdStyle}>
+            {schedule05[year]?.numero_dipendenti ?? "-"}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+  </div>
+)}
+{schedules.includes("50") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Profitability Analysis
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Metric</th>
+
+          {profitabilityYears.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {[
+          ["Profit", profitabilityData.profit],
+          [
+            "Employee Cost",
+            profitabilityData.employeeCost,
+          ],
+          [
+            "Number of Employees",
+            profitabilityData.employees,
+          ],
+        ].map(([label, values]) => (
+          <tr key={label}>
+            <td style={tdStyle}>
+              <strong>{label}</strong>
+            </td>
+
+            {profitabilityYears.map((year) => (
+              <td key={year} style={tdStyle}>
+                {values?.[year] ?? "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+)}
+{schedules.includes("85") && (
+  <div
+    style={{
+      marginTop: "20px",
+      background: "#ffffff",
+      borderRadius: "14px",
+      overflow: "hidden",
+      boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+      border: "1px solid #e5e7eb",
+    }}
+  >
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #7c3aed, #8b5cf6)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      Contacts, Shareholders, Executives & CEO
+    </h2>
+
+    <div style={{ padding: "20px" }}>
+      <h3
+  style={{
+    marginTop: "20px",
+    marginBottom: "0",
+    padding: "14px 18px",
+    background:
+      "linear-gradient(90deg, #1e3a8a, #2563eb)",
+    color: "#ffffff",
+    borderRadius: "8px 8px 0 0",
+    fontSize: "18px",
+    fontWeight: "700",
+  }}
+>
+  Contacts
+</h3>
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Phone</th>
+      <th style={thStyle}>Email</th>
+      <th style={thStyle}>PEC</th>
+      <th style={thStyle}>Website</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td style={tdStyle}>
+        {contacts?.telefoni?.join(", ") || "-"}
+      </td>
+
+      <td style={tdStyle}>
+        {contacts?.email?.join(", ") || "-"}
+      </td>
+
+      <td style={tdStyle}>
+        {contacts?.pec?.join(", ") || "-"}
+      </td>
+
+      <td style={tdStyle}>
+        {contacts?.siti_web?.join(", ") || "-"}
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3
+  style={{
+    marginTop: "30px",
+    marginBottom: "0",
+    padding: "14px 18px",
+    background:
+      "linear-gradient(90deg, #1e3a8a, #2563eb)",
+    color: "#ffffff",
+    borderRadius: "8px 8px 0 0",
+    fontSize: "18px",
+    fontWeight: "700",
+  }}
+>
+  Management Team
+</h3>
+
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Name</th>
+      <th style={thStyle}>Role</th>
+      <th style={thStyle}>Tax Code</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {managementTeam.map((person, index) => (
+      <tr key={index}>
+        <td style={tdStyle}>
+          {person.denominazione}
+        </td>
+
+        <td style={tdStyle}>
+          {person.carica}
+        </td>
+
+        <td style={tdStyle}>
+          {person.cf}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+<h3
+  style={{
+    marginTop: "30px",
+    marginBottom: "0",
+    padding: "14px 18px",
+    background:
+      "linear-gradient(90deg, #1e3a8a, #2563eb)",
+    color: "#ffffff",
+    borderRadius: "8px 8px 0 0",
+    fontSize: "18px",
+    fontWeight: "700",
+  }}
+>
+  Shareholders
+</h3>
+
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Shareholder</th>
+      <th style={thStyle}>Ownership %</th>
+      <th style={thStyle}>Nominal Value</th>
+      <th style={thStyle}>Paid Value</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {shareholders.map((shareholder, index) => (
+      <tr key={index}>
+        <td style={tdStyle}>
+          {shareholder.denominazione}
+        </td>
+
+        <td style={tdStyle}>
+          {shareholder.quota_perc_cons}%
+        </td>
+
+        <td style={tdStyle}>
+          {shareholder.valore_nominale?.toLocaleString()}
+        </td>
+
+        <td style={tdStyle}>
+          {shareholder.valore_versato?.toLocaleString()}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+    </div>
+  </div>
+)}
+   {schedules.includes("10") && (
+<div
+  style={{
+    marginTop: "20px",
+    background: "#ffffff",
+    borderRadius: "14px",
+    overflow: "hidden",
+    boxShadow: "0 6px 18px rgba(15, 23, 42, 0.08)",
+    border: "1px solid #e5e7eb",
+  }}
+>
       <h2
         style={{
           padding: "18px 22px",
@@ -508,124 +992,162 @@ liabilitiesData.forEach((item) => {
                 Financial Item
               </th>
 
-              {years.map((year) => (
-                <th key={year} style={thStyle}>
-                  {year}
-                </th>
-              ))}
+             {schedule10Years.map((year) => (
+  <th key={year} style={thStyle}>
+    {year}
+  </th>
+))}
             </tr>
           </thead>
 
-          <tbody>
-            <tr>
-              <td style={tdStyle}>Operating Revenue</td>
-              {renderYearData(incomeData.operatingRevenue)}
-            </tr>
+         <tbody>
+  <tr>
+    <td style={tdStyle}>Operating Revenue</td>
+    {renderYearData(
+      incomeData.operatingRevenue,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Other Revenue</td>
-              {renderYearData(incomeData.otherRevenue)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Other Revenue</td>
+    {renderYearData(
+      incomeData.otherRevenue,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Total Production Value</td>
-              {renderYearData(
-                incomeData.totalProductionValue
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Total Production Value</td>
+    {renderYearData(
+      incomeData.totalProductionValue,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Total Production Cost</td>
-              {renderYearData(
-                incomeData.totalProductionCost
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Total Production Cost</td>
+    {renderYearData(
+      incomeData.totalProductionCost,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Purchase Cost</td>
-              {renderYearData(incomeData.purchaseCost)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Purchase Cost</td>
+    {renderYearData(
+      incomeData.purchaseCost,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Service Cost</td>
-              {renderYearData(incomeData.serviceCost)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Service Cost</td>
+    {renderYearData(
+      incomeData.serviceCost,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>
-                Third-party Asset Cost
-              </td>
-              {renderYearData(
-                incomeData.thirdPartyAssetCost
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Third-party Asset Cost</td>
+    {renderYearData(
+      incomeData.thirdPartyAssetCost,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Employee Cost</td>
-              {renderYearData(incomeData.employeeCost)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Employee Cost</td>
+    {renderYearData(
+      incomeData.employeeCost,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>
-                Other Operating Expenses
-              </td>
-              {renderYearData(
-                incomeData.otherOperatingExpenses
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Other Operating Expenses</td>
+    {renderYearData(
+      incomeData.otherOperatingExpenses,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>EBITDA</td>
-              {renderYearData(incomeData.ebitda)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>EBITDA</td>
+    {renderYearData(
+      incomeData.ebitda,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>
-                Depreciation & Amortization
-              </td>
-              {renderYearData(incomeData.depreciation)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>
+      Depreciation & Amortization
+    </td>
+    {renderYearData(
+      incomeData.depreciation,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>EBIT</td>
-              {renderYearData(incomeData.ebit)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>EBIT</td>
+    {renderYearData(
+      incomeData.ebit,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>
-                Financial Income / Charges
-              </td>
-              {renderYearData(
-                incomeData.financialCharges
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>
+      Financial Income / Charges
+    </td>
+    {renderYearData(
+      incomeData.financialCharges,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Profit Before Tax</td>
-              {renderYearData(
-                incomeData.profitBeforeTax
-              )}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Profit Before Tax</td>
+    {renderYearData(
+      incomeData.profitBeforeTax,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Tax</td>
-              {renderYearData(incomeData.tax)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Tax</td>
+    {renderYearData(
+      incomeData.tax,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Net Profit / Loss</td>
-              {renderYearData(incomeData.netProfit)}
-            </tr>
+  <tr>
+    <td style={tdStyle}>Net Profit / Loss</td>
+    {renderYearData(
+      incomeData.netProfit,
+      schedule10Years
+    )}
+  </tr>
 
-            <tr>
-              <td style={tdStyle}>Cash Flow</td>
-              {renderYearData(incomeData.cashFlow)}
-            </tr>
-          </tbody>
+  <tr>
+    <td style={tdStyle}>Cash Flow</td>
+    {renderYearData(
+      incomeData.cashFlow,
+      schedule10Years
+    )}
+  </tr>
+</tbody>
         </table>
       </div>
-    </div>
-    <div
+   </div>
+)}
+
+{schedules.includes("20") && (
+<div
   style={{
     marginTop: "30px",
     background: "#ffffff",
@@ -669,7 +1191,7 @@ liabilitiesData.forEach((item) => {
             Financial Item
           </th>
 
-          {years.map((year) => (
+      {schedule20Years.map((year) => (
             <th key={year} style={thStyle}>
               {year}
             </th>
@@ -678,76 +1200,506 @@ liabilitiesData.forEach((item) => {
       </thead>
 
       <tbody>
-        <tr>
-          <td style={tdStyle}>Intangible Assets</td>
-          {renderYearData(
-            assetsTableData.intangibleAssets
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Intangible Assets</td>
+    {renderYearData(
+      assetsTableData.intangibleAssets,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Tangible Assets</td>
-          {renderYearData(
-            assetsTableData.tangibleAssets
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Tangible Assets</td>
+    {renderYearData(
+      assetsTableData.tangibleAssets,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Total Fixed Assets</td>
-          {renderYearData(
-            assetsTableData.totalFixedAssets
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Total Fixed Assets</td>
+    {renderYearData(
+      assetsTableData.totalFixedAssets,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Total Receivables</td>
-          {renderYearData(
-            assetsTableData.totalReceivables
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Total Receivables</td>
+    {renderYearData(
+      assetsTableData.totalReceivables,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Receivables within 12 Months
-          </td>
-          {renderYearData(
-            assetsTableData.receivables12Months
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Receivables within 12 Months
+    </td>
+    {renderYearData(
+      assetsTableData.receivables12Months,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Cash & Cash Equivalents
-          </td>
-          {renderYearData(
-            assetsTableData.cashEquivalents
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Cash & Cash Equivalents
+    </td>
+    {renderYearData(
+      assetsTableData.cashEquivalents,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Current Assets</td>
-          {renderYearData(
-            assetsTableData.currentAssets
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Current Assets</td>
+    {renderYearData(
+      assetsTableData.currentAssets,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Accrued Assets</td>
-          {renderYearData(
-            assetsTableData.accruedAssets
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Accrued Assets</td>
+    {renderYearData(
+      assetsTableData.accruedAssets,
+      schedule20Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Total Assets</td>
-          {renderYearData(
-            assetsTableData.totalAssets
-          )}
-        </tr>
-      </tbody>
+  <tr>
+    <td style={tdStyle}>Total Assets</td>
+    {renderYearData(
+      assetsTableData.totalAssets,
+      schedule20Years
+    )}
+  </tr>
+</tbody>
     </table>
   </div>
 </div>
+)}
+
+
+
+  {schedules.includes("40") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Financial Ratios & Indicators
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Indicator</th>
+
+          {ratioYears.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {[
+          ["ROE (%)", ratioData.roe],
+          ["ROI (%)", ratioData.roi],
+          ["ROS (%)", ratioData.ros],
+          ["Current Ratio", ratioData.currentRatio],
+          ["Quick Ratio", ratioData.quickRatio],
+          [
+            "Net Financial Position",
+            ratioData.netFinancialPosition,
+          ],
+          [
+            "Revenue Growth (%)",
+            ratioData.revenueGrowth,
+          ],
+          [
+            "Production Value Growth (%)",
+            ratioData.productionGrowth,
+          ],
+          [
+            "Net Worth Growth (%)",
+            ratioData.netWorthGrowth,
+          ],
+          [
+            "Total Assets Growth (%)",
+            ratioData.assetsGrowth,
+          ],
+        ].map(([label, values]) => (
+          <tr key={label}>
+            <td style={tdStyle}>
+              <strong>{label}</strong>
+            </td>
+
+            {ratioYears.map((year) => (
+              <td key={year} style={tdStyle}>
+                {values?.[year] ?? "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+)}
+
+{schedules.includes("60") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Productivity Analysis
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Metric</th>
+
+          {productivityYears.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {[
+          ["Revenue", productivityData.revenue],
+          [
+            "Employee Cost",
+            productivityData.employeeCost,
+          ],
+          [
+            "Number of Employees",
+            productivityData.employees,
+          ],
+        ].map(([label, values]) => (
+          <tr key={label}>
+            <td style={tdStyle}>
+              <strong>{label}</strong>
+            </td>
+
+            {productivityYears.map((year) => (
+              <td key={year} style={tdStyle}>
+                {values?.[year] ?? "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+)}  
+{schedules.includes("70") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Growth Analysis
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Metric</th>
+
+          {growthYears.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        {[
+          ["Profit", growthData.profit],
+          ["Revenue", growthData.revenue],
+          [
+            "Employee Cost",
+            growthData.employeeCost,
+          ],
+          [
+            "Number of Employees",
+            growthData.employees,
+          ],
+        ].map(([label, values]) => (
+          <tr key={label}>
+            <td style={tdStyle}>
+              <strong>{label}</strong>
+            </td>
+
+            {growthYears.map((year) => (
+              <td key={year} style={tdStyle}>
+                {values?.[year] ?? "-"}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+)}
+{schedules.includes("ANA") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Company Registry Information
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        <tr>
+          <td style={thStyle}>Company Name</td>
+          <td style={tdStyle}>
+            {scheduleANA.ragione_sociale || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Tax Code</td>
+          <td style={tdStyle}>
+            {scheduleANA.codice_fiscale || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>VAT Number</td>
+          <td style={tdStyle}>
+            {scheduleANA.partita_iva || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Legal Form</td>
+          <td style={tdStyle}>
+            {scheduleANA.forma_giuridica?.descrizione ||
+              "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>ATECO Code</td>
+          <td style={tdStyle}>
+            {scheduleANA.ateco?.codice || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>ATECO Description</td>
+          <td style={tdStyle}>
+            {scheduleANA.ateco?.descrizione || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Registered Office</td>
+          <td style={tdStyle}>
+            {scheduleANA.sede_legale || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Registration Date</td>
+          <td style={tdStyle}>
+            {scheduleANA.data_iscrizione || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Business Start Date</td>
+          <td style={tdStyle}>
+            {scheduleANA.inizio_attivita || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Share Capital</td>
+          <td style={tdStyle}>
+            {scheduleANA.capitale_sociale || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Phone</td>
+          <td style={tdStyle}>
+            {scheduleANA.telefono || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Email</td>
+          <td style={tdStyle}>
+            {scheduleANA.email || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>PEC</td>
+          <td style={tdStyle}>
+            {scheduleANA.pec || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>SDI</td>
+          <td style={tdStyle}>
+            {scheduleANA.sdi || "-"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{schedules.includes("PROT") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Protests & Negative Records
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        <tr>
+          <td style={thStyle}>Protests</td>
+          <td style={tdStyle}>
+            {schedulePROT.protesti || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Negative Records</td>
+          <td style={tdStyle}>
+            {schedulePROT.pregiudizievoli || "-"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{schedules.includes("CR") && (
+  <>
+    <h2
+      style={{
+        marginTop: "30px",
+        marginBottom: "0",
+        padding: "14px 18px",
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+        borderRadius: "8px 8px 0 0",
+      }}
+    >
+      Credit Score & Rating
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        <tr>
+          <td style={thStyle}>Credit Score</td>
+          <td style={tdStyle}>
+            {scheduleCR?.credit_score ?? "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Rating</td>
+          <td style={tdStyle}>
+            {scheduleCR?.rating ?? "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={thStyle}>Credit Line</td>
+          <td style={tdStyle}>
+            {scheduleCR?.linea_credito_affidamento?.toLocaleString() ?? "-"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{schedules.includes("30") && (
 <div
   style={{
     marginTop: "30px",
@@ -792,7 +1744,7 @@ liabilitiesData.forEach((item) => {
             Financial Item
           </th>
 
-          {years.map((year) => (
+          {schedule30Years.map((year) => (
             <th key={year} style={thStyle}>
               {year}
             </th>
@@ -801,92 +1753,105 @@ liabilitiesData.forEach((item) => {
       </thead>
 
       <tbody>
-        <tr>
-          <td style={tdStyle}>Equity / Net Worth</td>
-          {renderYearData(
-            liabilitiesTableData.netWorth
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Equity / Net Worth</td>
+    {renderYearData(
+      liabilitiesTableData.netWorth,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Share Capital</td>
-          {renderYearData(
-            liabilitiesTableData.shareCapital
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Share Capital</td>
+    {renderYearData(
+      liabilitiesTableData.shareCapital,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Reserves</td>
-          {renderYearData(
-            liabilitiesTableData.reserves
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Reserves</td>
+    {renderYearData(
+      liabilitiesTableData.reserves,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Retained Earnings / Profit
-          </td>
-          {renderYearData(
-            liabilitiesTableData.retainedEarnings
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Retained Earnings / Profit
+    </td>
+    {renderYearData(
+      liabilitiesTableData.retainedEarnings,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Provisions</td>
-          {renderYearData(
-            liabilitiesTableData.provisions
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Provisions</td>
+    {renderYearData(
+      liabilitiesTableData.provisions,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Employee Severance Fund
-          </td>
-          {renderYearData(
-            liabilitiesTableData.employeeSeveranceFund
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Employee Severance Fund
+    </td>
+    {renderYearData(
+      liabilitiesTableData.employeeSeveranceFund,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Total Payables</td>
-          {renderYearData(
-            liabilitiesTableData.totalPayables
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>Total Payables</td>
+    {renderYearData(
+      liabilitiesTableData.totalPayables,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Payables within 12 Months
-          </td>
-          {renderYearData(
-            liabilitiesTableData.payables12Months
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Payables within 12 Months
+    </td>
+    {renderYearData(
+      liabilitiesTableData.payables12Months,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>
-            Accrued Liabilities
-          </td>
-          {renderYearData(
-            liabilitiesTableData.accruedLiabilities
-          )}
-        </tr>
+  <tr>
+    <td style={tdStyle}>
+      Accrued Liabilities
+    </td>
+    {renderYearData(
+      liabilitiesTableData.accruedLiabilities,
+      schedule30Years
+    )}
+  </tr>
 
-        <tr>
-          <td style={tdStyle}>Total Liabilities</td>
-          {renderYearData(
-            liabilitiesTableData.totalLiabilities
-          )}
-        </tr>
-      </tbody>
+  <tr>
+    <td style={tdStyle}>Total Liabilities</td>
+    {renderYearData(
+      liabilitiesTableData.totalLiabilities,
+      schedule30Years
+    )}
+  </tr>
+</tbody>
     </table>
   </div>
 </div>
-  </div>
- );
+)}
+  
+  
+        </div>
+);
+};
+ 
 
 
  
-};
-
 export default ItalyReportsPage;
