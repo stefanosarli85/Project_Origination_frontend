@@ -1,41 +1,23 @@
-name: Deploy Frontend to EC2
+name: Deploy Frontend
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   deploy:
-    name: Build & Deploy
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
-
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            cd /home/ubuntu/Project_Origination_frontend
+            cd ~/Project_Origination_frontend
             git pull origin main
-
-            # Build Docker image
-            sudo docker build -t project_origination_frontend .
-
-            # Stop and remove old container
-            sudo docker stop project-origination-frontend || true
-            sudo docker rm project-origination-frontend || true
-
-            # Run new container
-            sudo docker run -d \
-              -p 80:80 \
-              --restart always \
-              --name project-origination-frontend \
-              project_origination_frontend
-
-            echo "✅ Frontend deployed!"
+            docker build -t project-origination-frontend .
+            docker stop frontend || true
+            docker rm frontend || true
+            docker run -d -p 80:80 --name frontend --restart always project-origination-frontend
