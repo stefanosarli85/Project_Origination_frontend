@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-
+ 
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-
+ 
 import {
   Box,
   Chip,
@@ -25,7 +25,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PeopleIcon from "@mui/icons-material/People";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-
+ 
 // ─── Field group definitions ────────────────────────────────────────────────
 const FIELD_GROUPS = [
   {
@@ -58,7 +58,7 @@ const FIELD_GROUPS = [
       "codice_ateco_secondario", "attivita_prevalente",
     ],
   },
-  
+ 
   {
     label: "Registry & Legal",
     icon: <AccountBalanceIcon fontSize="small" />,
@@ -77,7 +77,7 @@ const FIELD_GROUPS = [
     keys: ["pec", "sdi", "email", "telefono", "sito_web"],
   },
 ];
-
+ 
 const KEY_METRICS = [
   {
     key: "ricavi_operativi_2024",
@@ -104,29 +104,29 @@ const KEY_METRICS = [
     prefix: "",
   },
 ];
-
+ 
 const HEADER_KEYS = new Set(["denominazione", "codice_fiscale", "comune", "provincia"]);
 const ALL_GROUPED_KEYS = new Set(
   FIELD_GROUPS.flatMap((g) => g.keys).concat(KEY_METRICS.map((m) => m.key))
 );
-
+ 
 const fmtKey = (key) =>
   key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-
+ 
 const fmtValue = (val) => {
   if (val === null || val === undefined || val === "") return null;
   if (typeof val === "number") return val.toLocaleString("en-US");
   return String(val);
 };
-
+ 
 // ─── Section card ────────────────────────────────────────────────────────────
 const SectionCard = ({ group, data }) => {
   const entries = group.keys
     .map((k) => [k, fmtValue(data[k])])
     .filter(([, v]) => v !== null);
-
+ 
   if (entries.length === 0) return null;
-  
+ 
   return (
     <Box
       sx={{
@@ -158,7 +158,7 @@ const SectionCard = ({ group, data }) => {
           {group.label}
         </Typography>
       </Box>
-
+ 
       {/* Fields */}
       <Box sx={{ p: 0 }}>
   <table
@@ -182,7 +182,7 @@ const SectionCard = ({ group, data }) => {
           >
             {fmtKey(key)}
           </td>
-
+ 
           <td
             style={{
               padding: "10px 12px",
@@ -196,26 +196,26 @@ const SectionCard = ({ group, data }) => {
     </tbody>
   </table>
 </Box>
-      
+     
     </Box>
   );
 };
-
+ 
 // ─── Main component ──────────────────────────────────────────────────────────
 const ItalyTable = () => {
   const navigate = useNavigate();
-
+ 
   const [data, setData] = useState([]);
   const [rowSelection, setRowSelection] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-
+ 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [scheduleDialogOpen, setScheduleDialogOpen] =
   useState(false);
-
+ 
 const [selectedSchedules, setSelectedSchedules] =
   useState([]);
   const SCHEDULES = [
@@ -244,31 +244,31 @@ const [selectedSchedules, setSelectedSchedules] =
     label: "Credit Score & Rating",
   },
 ];
-
+ 
   const shareholders =
   reportData?.data?.related_data?.italy_company_shareholders || [];
-
-
+ 
+ 
   const [columnFilters, setColumnFilters] = useState([]);
-
+ 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-
+ 
         const params = new URLSearchParams();
         let hasFilters = false;
-
+ 
         columnFilters.forEach((filter) => {
           const value = filter.value?.toString().trim();
           if (!value) return;
           hasFilters = true;
-
+ 
           if (filter.id === "codice_fiscale") params.append("company_code", value);
           if (filter.id === "denominazione") params.append("company_name", value);
           if (filter.id === "comune") params.append("city", value);
           if (filter.id === "codice_ateco") params.append("industry_code", value);
-
+ 
           if (filter.id === "ricavi_operativi_2024") {
             if (value.includes("-")) {
               const [min, max] = value.split("-");
@@ -282,7 +282,7 @@ const [selectedSchedules, setSelectedSchedules] =
               params.append("revenue_min", value);
             }
           }
-
+ 
           if (filter.id === "ebit_2024") {
             if (value.includes("-")) {
               const [min, max] = value.split("-");
@@ -296,7 +296,7 @@ const [selectedSchedules, setSelectedSchedules] =
               params.append("ebit_min", value);
             }
           }
-
+ 
           if (filter.id === "numero_dipendenti_2024") {
             if (value.includes("-")) {
               const [min, max] = value.split("-");
@@ -312,19 +312,19 @@ const [selectedSchedules, setSelectedSchedules] =
             }
           }
         });
-
+ 
         const url = hasFilters
           ? `http://43.205.207.160:1701/api/italy-search-columns?${params.toString()}`
           : `http://43.205.207.160:1701/api/italy-get-all-records?page=1`;
-
+ 
         console.log("API URL:", url);
-
+ 
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch data");
-
+ 
         const json = await response.json();
         console.log("API RESPONSE:", json);
-
+ 
         setData(json.data || []);
         setIsError(false);
       } catch (error) {
@@ -334,10 +334,10 @@ const [selectedSchedules, setSelectedSchedules] =
         setIsLoading(false);
       }
     };
-
+ 
     fetchData();
   }, [columnFilters]);
-
+ 
   const columns = useMemo(
     () => [
       { accessorKey: "codice_fiscale", header: "Company Code" },
@@ -362,25 +362,48 @@ const [selectedSchedules, setSelectedSchedules] =
     ],
     []
   );
-
+ 
   const handleRowSelection = (rowId) => setRowSelection({ [rowId]: true });
-
+ 
   const handleInfoClick = async (row) => {
   try {
     const companyCode =
       row.original.codice_fiscale;
-
+     
+ 
     const response = await fetch(
       `http://43.205.207.160:1701/api/italy/company/${companyCode}`
     );
-
+ 
     const data = await response.json();
-    console.log("REPORT DATA:", data);
+    console.log(
+  "BALANCE SHEET",
+  data?.data?.related_data?.italy_company_balance_sheet
+);
 
+console.log(
+  "ASSETS",
+  data?.data?.related_data?.italy_company_assets
+);
+
+console.log(
+  "LIABILITIES",
+  data?.data?.related_data?.italy_company_liabilities
+);
+    console.log("ACTION RESPONSE", data);
+ 
     setSelectedRowData(row.original);
-    setReportData(data);
 
-    setModalOpen(true);
+if (data?.success === true) {
+  setReportData(data);
+} else {
+  setReportData({
+    success: false,
+    searchData: row.original,
+  });
+}
+
+setModalOpen(true);
   } catch (error) {
     console.error(error);
   }
@@ -388,9 +411,9 @@ const [selectedSchedules, setSelectedSchedules] =
  const handleFetchReports = () => {
   const selectedRow =
     table.getSelectedRowModel().rows[0];
-
+ const searchData = selectedRow.original;
   if (!selectedRow) return;
-
+ 
   setScheduleDialogOpen(true);
 };
 const handleScheduleToggle = (code) => {
@@ -404,27 +427,29 @@ const handleGenerateReport = async () => {
   try {
     const selectedRow =
       table.getSelectedRowModel().rows[0];
-
+ 
     if (!selectedRow) return;
-
+ 
     const companyCode =
       selectedRow.original.codice_fiscale;
-
+     
     const params = new URLSearchParams();
-
+ 
     selectedSchedules.forEach((schedule) => {
       params.append("schedules", schedule);
     });
-
+    const searchData = selectedRow.original;
+ 
+ 
     const response = await fetch(
       `${BASE_URL}/api/italy/company/${companyCode}?${params.toString()}`,
       {
         method: "POST",
       }
     );
-
+ 
     const data = await response.json();
-
+ 
     console.log("REPORT RESPONSE", data);
     console.log(
   "Selected Schedules Before Navigate:",
@@ -434,7 +459,10 @@ navigate("/italy-reports", {
   state: {
     companyCodes: [companyCode],
     schedules: selectedSchedules,
-    reportData: data,
+    reportData: {
+      ...data,
+      searchData,
+    },
   },
 });
     setScheduleDialogOpen(false);
@@ -501,7 +529,7 @@ const [isDownloading, setIsDownloading] = useState(false);
     >
       Fetch Financial Reports
     </button>
-
+ 
     <button
       onClick={handleDownload}
       disabled={
@@ -529,37 +557,37 @@ const [isDownloading, setIsDownloading] = useState(false);
       : undefined,
   });
   const BASE_URL = "http://43.205.207.160:1701";
-
+ 
 const handleDownload = async () => {
   try {
     setIsDownloading(true);
-
+ 
     const selectedRow =
       table.getSelectedRowModel().rows[0];
-
+ 
     if (!selectedRow) {
       alert("Please select a company");
       return;
     }
-
+ 
     const companyCode =
       selectedRow.original.codice_fiscale;
-
+ 
     const response = await fetch(
       `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
       {
         method: "POST",
       }
     );
-
+ 
     const data = await response.json();
-
+ 
     const fileUrl = data?.s3_url;
-
+ 
     if (!fileUrl) {
       throw new Error("No file URL found");
     }
-
+ 
     window.open(fileUrl, "_blank");
   } catch (error) {
     console.error(error);
@@ -568,7 +596,7 @@ const handleDownload = async () => {
     setIsDownloading(false);
   }
 };
-
+ 
   // Leftover fields not covered by any group
   const otherEntries = selectedRowData
     ? Object.entries(selectedRowData).filter(
@@ -603,8 +631,8 @@ const handleDownload = async () => {
   reportData?.data?.related_data?.italy_company_people || [];
   const assetsData =
   reportData?.data?.related_data?.italy_company_assets || [];
-  
-
+ 
+ 
   const assetsTableData = {
   intangibleAssets: {},
   tangibleAssets: {},
@@ -618,37 +646,70 @@ const handleDownload = async () => {
 };
 assetsData.forEach((item) => {
   const year = item.financial_year;
-
+ 
   assetsTableData.intangibleAssets[year] =
     item.immobilizzazioni_immateriali;
-
+ 
   assetsTableData.tangibleAssets[year] =
     item.immobilizzazioni_materiali;
-
+ 
   assetsTableData.totalFixedAssets[year] =
     item.totale_immobilizzazioni;
-
+ 
   assetsTableData.totalReceivables[year] =
     item.totale_crediti;
-
+ 
   assetsTableData.receivables12Months[year] =
     item.crediti_entro_12_mesi;
-
+ 
   assetsTableData.cashEquivalents[year] =
     item.disponibilita_liquide;
-
+ 
   assetsTableData.currentAssets[year] =
     item.attivo_circolante;
-
+ 
   assetsTableData.accruedAssets[year] =
     item.ratei_risconti_attivi;
-
+ 
   assetsTableData.totalAssets[year] =
     item.totale_attivo;
 });
+const searchData = reportData?.searchData;
+console.log("SEARCH DATA KEYS", Object.keys(searchData || {}));
+
+const isSearchData =
+  reportData?.success === false &&
+  reportData?.searchData;
+
+if (isSearchData) {
+  assetsTableData.intangibleAssets = {
+    2022: searchData?.immobilizzazioni_immateriali_2022,
+    2023: searchData?.immobilizzazioni_immateriali_2023,
+    2024: searchData?.immobilizzazioni_immateriali_2024,
+  };
+
+  assetsTableData.tangibleAssets = {
+    2022: searchData?.immobilizzazioni_materiali_2022,
+    2023: searchData?.immobilizzazioni_materiali_2023,
+    2024: searchData?.immobilizzazioni_materiali_2024,
+  };
+
+  assetsTableData.totalReceivables = {
+    2022: searchData?.crediti_verso_clienti_2022,
+    2023: searchData?.crediti_verso_clienti_2023,
+    2024: searchData?.crediti_verso_clienti_2024,
+  };
+
+  assetsTableData.cashEquivalents = {
+    2022: searchData?.disponibilita_liquide_2022,
+    2023: searchData?.disponibilita_liquide_2023,
+    2024: searchData?.disponibilita_liquide_2024,
+  };
+}
+
 const liabilitiesData =
   reportData?.data?.related_data?.italy_company_liabilities || [];
-
+ 
 const liabilitiesTableData = {
   netWorth: {},
   shareCapital: {},
@@ -663,42 +724,128 @@ const liabilitiesTableData = {
 };
 liabilitiesData.forEach((item) => {
   const year = item.financial_year;
-
+ 
   liabilitiesTableData.netWorth[year] =
     item.patrimonio_netto;
-
+ 
   liabilitiesTableData.shareCapital[year] =
     item.capitale_sociale;
-
+ 
   liabilitiesTableData.reserves[year] =
     item.riserve;
-
+ 
   liabilitiesTableData.retainedEarnings[year] =
     item.utile_perdita_portato_a_nuovo;
-
+ 
   liabilitiesTableData.provisions[year] =
     item.fondi_rischi_oneri;
-
+ 
   liabilitiesTableData.employeeSeveranceFund[year] =
     item.trattamento_fine_rapporto;
-
+ 
   liabilitiesTableData.totalPayables[year] =
     item.totale_debiti;
-
+ 
   liabilitiesTableData.payables12Months[year] =
     item.debiti_entro_12_mesi;
-
+ 
   liabilitiesTableData.accruedLiabilities[year] =
     item.ratei_risconti_passivi;
-
+ 
   liabilitiesTableData.totalLiabilities[year] =
     item.totale_passivo;
 });
+if (isSearchData) {
+ liabilitiesTableData.netWorth = {
+    2022: searchData?.equity_net_worth_2022,
+    2023: searchData?.equity_net_worth_2023,
+    2024: searchData?.equity_net_worth_2024,
+  };
+
+  liabilitiesTableData.shareCapital = {
+    2022: searchData?.share_capital_2022,
+    2023: searchData?.share_capital_2023,
+    2024: searchData?.share_capital_2024,
+  };
+
+  liabilitiesTableData.reserves = {
+    2022: searchData?.reserves_2022,
+    2023: searchData?.reserves_2023,
+    2024: searchData?.reserves_2024,
+  };
+liabilitiesTableData.retainedEarnings = {
+    2022: searchData?.retained_earnings_profit_2022,
+    2023: searchData?.retained_earnings_profit_2023,
+    2024: searchData?.retained_earnings_profit_2024,
+  };
+
+  liabilitiesTableData.provisions = {
+    2022: searchData?.provisions_2022,
+    2023: searchData?.provisions_2023,
+    2024: searchData?.provisions_2024,
+  };
+
+  liabilitiesTableData.employeeSeveranceFund = {
+    2022: searchData?.trattamento_fine_rapporto_2022,
+    2023: searchData?.trattamento_fine_rapporto_2023,
+    2024: searchData?.trattamento_fine_rapporto_2024,
+  };
+
+  liabilitiesTableData.totalPayables = {
+    2022: searchData?.totale_debiti_2022,
+    2023: searchData?.totale_debiti_2023,
+    2024: searchData?.totale_debiti_2024,
+  };
+
+  liabilitiesTableData.payables12Months = {
+    2022: searchData?.debiti_entro_12_mesi_2022,
+    2023: searchData?.debiti_entro_12_mesi_2023,
+    2024: searchData?.debiti_entro_12_mesi_2024,
+  };
+
+  liabilitiesTableData.accruedLiabilities = {
+    2022: searchData?.accrued_liabilities_2022,
+    2023: searchData?.accrued_liabilities_2023,
+    2024: searchData?.accrued_liabilities_2024,
+  };
+
+  liabilitiesTableData.totalLiabilities = {
+    2022: searchData?.total_liabilities_2022,
+    2023: searchData?.total_liabilities_2023,
+    2024: searchData?.total_liabilities_2024,
+  };
+  console.log(
+  "NET WORTH",
+  searchData?.equity_net_worth_2022
+);
+
+console.log(
+  "SHARE CAPITAL",
+  searchData?.share_capital_2022
+);
+
+console.log(
+  "TOTAL LIABILITIES",
+  searchData?.total_liabilities_2022
+);
+}
     const incomeStatement =
   reportData?.data?.related_data?.italy_company_balance_sheet || [];
-const years = [...new Set(
-  incomeStatement.map((item) => String(item.financial_year))
-)].sort((a, b) => a - b);
+ 
+  console.log(
+  "BALANCE SHEET",
+  reportData?.data?.related_data?.italy_company_balance_sheet
+);
+
+const years =
+  incomeStatement.length > 0
+    ? [...new Set(
+        incomeStatement.map((item) =>
+          String(item.financial_year)
+        )
+      )].sort((a, b) => a - b)
+    : ["2022", "2023", "2024"];
+   
 const incomeData = {
   operatingRevenue: {},
   otherRevenue: {},
@@ -718,49 +865,165 @@ const incomeData = {
   netProfit: {},
   cashFlow: {},
 };
-
+ 
 incomeStatement.forEach((item) => {
   const year = item.financial_year;
 
-  incomeData.operatingRevenue[year] = item.ricavi_operativi;
-  incomeData.otherRevenue[year] = item.ricavi_e_proventi;
+  incomeData.operatingRevenue[year] =
+    item.ricavi_operativi;
+
+  incomeData.otherRevenue[year] =
+    item.ricavi_e_proventi;
+
   incomeData.totalProductionValue[year] =
     item.totale_valore_produzione;
+
   incomeData.totalProductionCost[year] =
     item.totale_costi_produzione;
+
   incomeData.purchaseCost[year] =
     item.costo_per_acquisti;
+
   incomeData.serviceCost[year] =
     item.costo_per_servizi;
+
   incomeData.thirdPartyAssetCost[year] =
     item.costo_per_godimento_beni_terzi;
+
   incomeData.employeeCost[year] =
     item.costo_personale;
+
   incomeData.otherOperatingExpenses[year] =
     item.oneri_diversi_gestione;
+
   incomeData.ebitda[year] =
     item.ebitda;
+
   incomeData.depreciation[year] =
     item.ammortamenti_svalutazioni;
+
   incomeData.ebit[year] =
     item.ebit;
+
   incomeData.financialCharges[year] =
     item.proventi_oneri_finanziari;
+
   incomeData.profitBeforeTax[year] =
     item.risultato_prima_imposte;
+
   incomeData.tax[year] =
     item.imposte_reddito;
+
   incomeData.netProfit[year] =
     item.utile_perdita_esercizio;
+
   incomeData.cashFlow[year] =
     item.flusso_di_cassa;
 });
 
+if (isSearchData) {
+  incomeData.operatingRevenue = {
+    2022: searchData?.ricavi_operativi_2022,
+    2023: searchData?.ricavi_operativi_2023,
+    2024: searchData?.ricavi_operativi_2024,
+  };
 
+  incomeData.totalProductionValue = {
+    2022: searchData?.totale_valore_produzione_2022,
+    2023: searchData?.totale_valore_produzione_2023,
+    2024: searchData?.totale_valore_produzione_2024,
+  };
+
+  incomeData.totalProductionCost = {
+    2022: searchData?.totale_costi_produzione_2022,
+    2023: searchData?.totale_costi_produzione_2023,
+    2024: searchData?.totale_costi_produzione_2024,
+  };
+
+  incomeData.employeeCost = {
+    2022: searchData?.costo_personale_2022,
+    2023: searchData?.costo_personale_2023,
+    2024: searchData?.costo_personale_2024,
+  };
+  incomeData.depreciation = {
+  2022: searchData?.ammortamenti_e_svalutazioni_2022,
+  2023: searchData?.ammortamenti_e_svalutazioni_2023,
+  2024: searchData?.ammortamenti_e_svalutazioni_2024,
+};
+
+  incomeData.ebit = {
+    2022: searchData?.ebit_2022,
+    2023: searchData?.ebit_2023,
+    2024: searchData?.ebit_2024,
+  };
+  incomeData.otherRevenue = {
+  2022: searchData?.other_revenue_2022,
+  2023: searchData?.other_revenue_2023,
+  2024: searchData?.other_revenue_2024,
+};
+
+incomeData.purchaseCost = {
+  2022: searchData?.purchase_cost_2022,
+  2023: searchData?.purchase_cost_2023,
+  2024: searchData?.purchase_cost_2024,
+};
+
+incomeData.serviceCost = {
+  2022: searchData?.service_cost_2022,
+  2023: searchData?.service_cost_2023,
+  2024: searchData?.service_cost_2024,
+};
+
+incomeData.thirdPartyAssetCost = {
+  2022: searchData?.third_party_asset_cost_2022,
+  2023: searchData?.third_party_asset_cost_2023,
+  2024: searchData?.third_party_asset_cost_2024,
+};
+
+incomeData.ebitda = {
+  2022: searchData?.ebitda_2022,
+  2023: searchData?.ebitda_2023,
+  2024: searchData?.ebitda_2024,
+};
+
+incomeData.financialCharges = {
+  2022: searchData?.financial_charges_2022,
+  2023: searchData?.financial_charges_2023,
+  2024: searchData?.financial_charges_2024,
+};
+
+incomeData.profitBeforeTax = {
+  2022: searchData?.profit_before_tax_2022,
+  2023: searchData?.profit_before_tax_2023,
+  2024: searchData?.profit_before_tax_2024,
+};
+
+incomeData.tax = {
+  2022: searchData?.tax_2022,
+  2023: searchData?.tax_2023,
+  2024: searchData?.tax_2024,
+};
+
+incomeData.netProfit = {
+  2022: searchData?.net_profit_2022,
+  2023: searchData?.net_profit_2023,
+  2024: searchData?.net_profit_2024,
+};
+
+incomeData.cashFlow = {
+  2022: searchData?.cash_flow_2022,
+  2023: searchData?.cash_flow_2023,
+  2024: searchData?.cash_flow_2024,
+};
+  
+
+  console.log("IS SEARCH DATA", isSearchData);
+  console.log("SEARCH DATA", searchData);
+}
   return (
     <>
       <MaterialReactTable table={table} />
-
+ 
       <Dialog
         open={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -794,7 +1057,7 @@ incomeStatement.forEach((item) => {
             >
               <CloseIcon />
             </IconButton>
-
+ 
             <Typography
               variant="h5"
               fontWeight={700}
@@ -802,7 +1065,7 @@ incomeStatement.forEach((item) => {
             >
               {selectedRowData.denominazione || "Company Details"}
             </Typography>
-
+ 
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
               {selectedRowData.codice_fiscale && (
                 <Chip
@@ -840,8 +1103,8 @@ incomeStatement.forEach((item) => {
             </Box>
           </Box>
         )}
-
-
+ 
+ 
         {/* ── Key metrics strip ── */}
         {selectedRowData && (
           <Box
@@ -890,8 +1153,8 @@ incomeStatement.forEach((item) => {
             })}
           </Box>
         )}
-        
-
+       
+ 
         {/* ── Scrollable sections ── */}
         <DialogContent
           sx={{
@@ -906,9 +1169,9 @@ incomeStatement.forEach((item) => {
             FIELD_GROUPS.map((group) => (
               <SectionCard key={group.label} group={group} data={selectedRowData} />
             ))}
-
+ 
           {/* Overflow / ungrouped fields */}
-
+ 
           {people.length > 0 && (
   <Box
   sx={{
@@ -939,7 +1202,7 @@ incomeStatement.forEach((item) => {
         Management Team
       </Typography>
     </Box>
-
+ 
     <table
       style={{
         width: "100%",
@@ -953,18 +1216,18 @@ incomeStatement.forEach((item) => {
           <th style={thStyle}>Category</th>
         </tr>
       </thead>
-
+ 
       <tbody>
         {people.map((person, index) => (
           <tr key={index}>
             <td style={tdStyle}>
               {person.full_name}
             </td>
-
+ 
             <td style={tdStyle}>
               {person.role_name}
             </td>
-
+ 
             <td style={tdStyle}>
               {person.category}
             </td>
@@ -974,7 +1237,7 @@ incomeStatement.forEach((item) => {
     </table>
   </Box>
 )}
-
+ 
 {shareholders.length > 0 && (
   <Box
   sx={{
@@ -1001,7 +1264,7 @@ incomeStatement.forEach((item) => {
         Shareholders
       </Typography>
     </Box>
-
+ 
     <table
       style={{
         width: "100%",
@@ -1015,18 +1278,18 @@ incomeStatement.forEach((item) => {
           <th style={thStyle}>Nominal Value</th>
         </tr>
       </thead>
-
+ 
       <tbody>
         {shareholders.map((item, index) => (
           <tr key={index}>
             <td style={tdStyle}>
               {item.shareholder_name || "-"}
             </td>
-
+ 
             <td style={tdStyle}>
               {item.ownership_percentage || "-"}
             </td>
-
+ 
             <td style={tdStyle}>
               {item.nominal_value
                 ? Number(item.nominal_value).toLocaleString("en-US")
@@ -1053,7 +1316,7 @@ incomeStatement.forEach((item) => {
       >
         Income Statement (Conto Economico) - EUR (€)
       </h2>
-
+ 
       <div style={{ overflowX: "auto" }}>
         <table
           style={{
@@ -1073,7 +1336,7 @@ incomeStatement.forEach((item) => {
               >
                 Financial Item
               </th>
-
+ 
               {years.map((year) => (
                 <th key={year} style={thStyle}>
                   {year}
@@ -1081,42 +1344,42 @@ incomeStatement.forEach((item) => {
               ))}
             </tr>
           </thead>
-
+ 
           <tbody>
             <tr>
               <td style={tdStyle}>Operating Revenue</td>
               {renderYearData(incomeData.operatingRevenue)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Other Revenue</td>
               {renderYearData(incomeData.otherRevenue)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Total Production Value</td>
               {renderYearData(
                 incomeData.totalProductionValue
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Total Production Cost</td>
               {renderYearData(
                 incomeData.totalProductionCost
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Purchase Cost</td>
               {renderYearData(incomeData.purchaseCost)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Service Cost</td>
               {renderYearData(incomeData.serviceCost)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>
                 Third-party Asset Cost
@@ -1125,12 +1388,12 @@ incomeStatement.forEach((item) => {
                 incomeData.thirdPartyAssetCost
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Employee Cost</td>
               {renderYearData(incomeData.employeeCost)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>
                 Other Operating Expenses
@@ -1139,24 +1402,24 @@ incomeStatement.forEach((item) => {
                 incomeData.otherOperatingExpenses
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>EBITDA</td>
               {renderYearData(incomeData.ebitda)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>
                 Depreciation & Amortization
               </td>
               {renderYearData(incomeData.depreciation)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>EBIT</td>
               {renderYearData(incomeData.ebit)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>
                 Financial Income / Charges
@@ -1165,24 +1428,24 @@ incomeStatement.forEach((item) => {
                 incomeData.financialCharges
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Profit Before Tax</td>
               {renderYearData(
                 incomeData.profitBeforeTax
               )}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Tax</td>
               {renderYearData(incomeData.tax)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Net Profit / Loss</td>
               {renderYearData(incomeData.netProfit)}
             </tr>
-
+ 
             <tr>
               <td style={tdStyle}>Cash Flow</td>
               {renderYearData(incomeData.cashFlow)}
@@ -1203,7 +1466,7 @@ incomeStatement.forEach((item) => {
   >
     Balance Sheet Assets • EUR (€)
   </h2>
-
+ 
   <div style={{ overflowX: "auto" }}>
     <table
       style={{
@@ -1223,7 +1486,7 @@ incomeStatement.forEach((item) => {
           >
             Financial Item
           </th>
-
+ 
           {years.map((year) => (
             <th key={year} style={thStyle}>
               {year}
@@ -1231,7 +1494,7 @@ incomeStatement.forEach((item) => {
           ))}
         </tr>
       </thead>
-
+ 
       <tbody>
         <tr>
           <td style={tdStyle}>Intangible Assets</td>
@@ -1239,28 +1502,28 @@ incomeStatement.forEach((item) => {
             assetsTableData.intangibleAssets
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Tangible Assets</td>
           {renderYearData(
             assetsTableData.tangibleAssets
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Total Fixed Assets</td>
           {renderYearData(
             assetsTableData.totalFixedAssets
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Total Receivables</td>
           {renderYearData(
             assetsTableData.totalReceivables
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Receivables within 12 Months
@@ -1269,7 +1532,7 @@ incomeStatement.forEach((item) => {
             assetsTableData.receivables12Months
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Cash & Cash Equivalents
@@ -1278,21 +1541,21 @@ incomeStatement.forEach((item) => {
             assetsTableData.cashEquivalents
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Current Assets</td>
           {renderYearData(
             assetsTableData.currentAssets
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Accrued Assets</td>
           {renderYearData(
             assetsTableData.accruedAssets
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Total Assets</td>
           {renderYearData(
@@ -1315,7 +1578,7 @@ incomeStatement.forEach((item) => {
   >
     Balance Sheet Liabilities • EUR (€)
   </h2>
-
+ 
   <div style={{ overflowX: "auto" }}>
     <table
       style={{
@@ -1335,7 +1598,7 @@ incomeStatement.forEach((item) => {
           >
             Financial Item
           </th>
-
+ 
           {years.map((year) => (
             <th key={year} style={thStyle}>
               {year}
@@ -1343,7 +1606,7 @@ incomeStatement.forEach((item) => {
           ))}
         </tr>
       </thead>
-
+ 
       <tbody>
         <tr>
           <td style={tdStyle}>Equity / Net Worth</td>
@@ -1351,21 +1614,21 @@ incomeStatement.forEach((item) => {
             liabilitiesTableData.netWorth
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Share Capital</td>
           {renderYearData(
             liabilitiesTableData.shareCapital
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Reserves</td>
           {renderYearData(
             liabilitiesTableData.reserves
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Retained Earnings / Profit
@@ -1374,14 +1637,14 @@ incomeStatement.forEach((item) => {
             liabilitiesTableData.retainedEarnings
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Provisions</td>
           {renderYearData(
             liabilitiesTableData.provisions
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Employee Severance Fund
@@ -1390,14 +1653,14 @@ incomeStatement.forEach((item) => {
             liabilitiesTableData.employeeSeveranceFund
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Total Payables</td>
           {renderYearData(
             liabilitiesTableData.totalPayables
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Payables within 12 Months
@@ -1406,7 +1669,7 @@ incomeStatement.forEach((item) => {
             liabilitiesTableData.payables12Months
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>
             Accrued Liabilities
@@ -1415,7 +1678,7 @@ incomeStatement.forEach((item) => {
             liabilitiesTableData.accruedLiabilities
           )}
         </tr>
-
+ 
         <tr>
           <td style={tdStyle}>Total Liabilities</td>
           {renderYearData(
@@ -1424,10 +1687,10 @@ incomeStatement.forEach((item) => {
         </tr>
       </tbody>
     </table>
-    
+   
   </div>
-
-
+ 
+ 
         </DialogContent>
       </Dialog>
       <Dialog
@@ -1447,13 +1710,13 @@ incomeStatement.forEach((item) => {
     <Typography variant="h5" fontWeight={700}>
       Generate Custom Financial Report
     </Typography>
-
+ 
     <Typography sx={{ mt: 1, opacity: 0.9 }}>
       Select the schedules you would like
       to include in the report.
     </Typography>
   </Box>
-
+ 
   <DialogContent sx={{ p: 3 }}>
     {SCHEDULES.map((item) => (
       <Box
@@ -1489,13 +1752,13 @@ incomeStatement.forEach((item) => {
             fontWeight: 700,
           }}
         />
-
+ 
         <Typography>
           {item.label}
         </Typography>
       </Box>
     ))}
-
+ 
     <Box
       sx={{
         mt: 3,
@@ -1508,7 +1771,7 @@ incomeStatement.forEach((item) => {
         {selectedSchedules.length}
         {" "}Schedule(s) Selected
       </Typography>
-
+ 
       <Box>
         <button
           onClick={() =>
@@ -1525,7 +1788,7 @@ incomeStatement.forEach((item) => {
         >
           Cancel
         </button>
-
+ 
         <button
           onClick={handleGenerateReport}
           disabled={
@@ -1548,9 +1811,11 @@ incomeStatement.forEach((item) => {
   </DialogContent>
 </Dialog>
     </>
-    
+   
   );
 };
-
-
+ 
+ 
 export default ItalyTable;
+ 
+ 
