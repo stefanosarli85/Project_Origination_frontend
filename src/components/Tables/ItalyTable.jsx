@@ -455,6 +455,8 @@ const handleGenerateReport = async () => {
   "Selected Schedules Before Navigate:",
   selectedSchedules
 );
+sessionStorage.setItem("currentStep", "2");
+sessionStorage.setItem("currentRegion", "Italy");
 navigate("/italy-reports", {
   state: {
     companyCodes: [companyCode],
@@ -529,7 +531,24 @@ const [isDownloading, setIsDownloading] = useState(false);
     >
       Fetch Financial Reports
     </button>
- 
+ <button
+  onClick={() => {
+    sessionStorage.removeItem("currentStep");
+    sessionStorage.removeItem("currentRegion");
+    window.location.reload();
+  }}
+  style={{
+    padding: "10px 16px",
+    background: "#6b7280",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  ← Back to Landing Page
+</button>
     <button
       onClick={handleDownload}
       disabled={

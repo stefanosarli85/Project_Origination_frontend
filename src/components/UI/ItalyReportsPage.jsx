@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router";
+
+import { useLocation, useNavigate } from "react-router";
 
 const ItalyReportsPage = () => {
   const location = useLocation();
-
+const navigate = useNavigate();
   const companyCodes = useMemo(
     () => location.state?.companyCodes || [],
     [location.state?.companyCodes]
@@ -152,6 +153,7 @@ console.log("DOWNLOAD API:", data);
         gap: "16px",
       }}
     >
+      
       <div
         style={{
           width: "55px",
@@ -567,6 +569,25 @@ console.log("YEARS", schedule05Years);
       minHeight: "100vh",
     }}
   >
+   <button
+  onClick={() => {
+    console.log("BACK CLICKED");
+    navigate(-1);
+  }}
+>
+  ← Back to Italy Table
+</button>
+
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: "24px",
+        flexWrap: "wrap",
+        gap: "12px",
+      }}
+    ></div>
     <div
   style={{
     display: "flex",
@@ -598,7 +619,7 @@ console.log("YEARS", schedule05Years);
       gap: "10px",
       padding: "12px 18px",
       background: isDownloading
-        ? "#94a3b8"
+        ? "#94a3b8" 
         : "linear-gradient(135deg, #2563eb, #1d4ed8)",
       color: "#fff",
       border: "none",
@@ -1632,8 +1653,7 @@ console.log("YEARS", schedule05Years);
       style={{
         width: "100%",
         borderCollapse: "collapse",
-      }}
-    >
+      }}      >
       <tbody>
         <tr>
           <td style={thStyle}>Protests</td>

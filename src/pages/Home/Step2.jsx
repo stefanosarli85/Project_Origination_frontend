@@ -1,9 +1,16 @@
 import IndiaTable from "../../components/Tables/IndiaTable";
 import ItalyTable from "../../components/Tables/ItalyTable";
 
-const Step2 = ({ currentRegion }) => {
+const Step2 = ({
+  currentRegion,
+  setCurrentStep,
+}) => {
   if (currentRegion === "Italy") {
-    return <ItalyTable />;
+    return (
+      <ItalyTable
+        setCurrentStep={setCurrentStep}
+      />
+    );
   } else {
     return <IndiaTable />;
   }
