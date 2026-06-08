@@ -269,6 +269,11 @@ const [selectedSchedules, setSelectedSchedules] =
           if (filter.id === "denominazione") params.append("company_name", value);
           if (filter.id === "comune") params.append("city", value);
           if (filter.id === "codice_ateco") params.append("industry_code", value);
+          if (filter.id === "main_industry")
+  params.append("main_industry", value);
+
+if (filter.id === "sub_industry")
+  params.append("sub_industry", value);
  
           if (filter.id === "ricavi_operativi_2024") {
             if (value.includes("-")) {
@@ -383,6 +388,8 @@ console.log("FIRST RECORD:", json.data?.[0]);
       { accessorKey: "denominazione", header: "Company Name" },
       { accessorKey: "comune", header: "City" },
       { accessorKey: "codice_ateco", header: "Industry Code" },
+      { accessorKey: "main_industry", header: "Main Industry" },
+      { accessorKey: "sub_industry", header: "Sub Industry" },
       {
         accessorKey: "ricavi_operativi_2024",
         header: "Revenue 2024",
@@ -1237,6 +1244,66 @@ incomeData.cashFlow = {
             ))}
  
           {/* Overflow / ungrouped fields */}
+          <Box
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderLeft: "4px solid #1565c0",
+    borderRadius: "8px",
+    overflow: "hidden",
+    mb: 2,
+  }}
+>
+  <Box
+    sx={{
+      px: 2,
+      py: 1,
+      background: "#e3f2fd",
+    }}
+  >
+    <Typography
+      variant="caption"
+      fontWeight={700}
+      sx={{
+        color: "#1565c0",
+        textTransform: "uppercase",
+        letterSpacing: 1,
+      }}
+    >
+      PFN (Net Financial Position)
+    </Typography>
+  </Box>
+
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={thStyle}>Financial Item</th>
+        <th style={thStyle}>2022</th>
+        <th style={thStyle}>2023</th>
+        <th style={thStyle}>2024</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td style={tdStyle}>PFN</td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2022 || 0).toLocaleString("en-US")}
+        </td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2023 || 0).toLocaleString("en-US")}
+        </td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2024 || 0).toLocaleString("en-US")}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Box>
  
           {people.length > 0 && (
   <Box
