@@ -213,6 +213,7 @@ const ItalyTable = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState(null);
   const [reportData, setReportData] = useState(null);
+  
   const [scheduleDialogOpen, setScheduleDialogOpen] =
   useState(false);
  
@@ -251,6 +252,12 @@ const [selectedSchedules, setSelectedSchedules] =
  
   const [columnFilters, setColumnFilters] = useState([]);
   const [sorting, setSorting] = useState([]);
+  const [rowCount, setRowCount] = useState(0);
+
+const [pagination, setPagination] = useState({
+  pageIndex: 0,
+  pageSize: 100,
+});
  
   useEffect(() => {
     const fetchData = async () => {
@@ -341,8 +348,15 @@ console.log("SORT COLUMN", sorting[0]?.id);
     "sort_order",
     sorting[0].desc ? "desc" : "asc"
   );
-    params.append("page", "1");
-  params.append("limit", "100");
+   params.append(
+  "page",
+  String(pagination.pageIndex + 1)
+);
+
+params.append(
+  "limit",
+  String(pagination.pageSize)
+);
 }
  
         const hasSorting = sorting.length > 0;
@@ -368,9 +382,9 @@ console.log("FIRST RECORD:", json.data?.[0]);
 
         
 
- 
-        setData(json.data || []);
-        setIsError(false);
+ setData(json.data || []);
+setRowCount(json.total || 0);
+setIsError(false);
       } catch (error) {
         console.error(error);
         setIsError(true);
@@ -380,7 +394,7 @@ console.log("FIRST RECORD:", json.data?.[0]);
     };
  
     fetchData();
-}, [columnFilters, sorting]);
+}, [columnFilters, sorting, pagination]);
  
   const columns = useMemo(
     () => [
@@ -531,16 +545,20 @@ const [isDownloading, setIsDownloading] = useState(false);
     enableRowActions: true,
     positionActionsColumn: "last",
     manualFiltering: true,
+    manualPagination: true,
+onPaginationChange: setPagination,
+rowCount,
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
 manualSorting: true,
     getRowId: (row) => row.codice_fiscale,
-  state: {
+ state: {
   rowSelection,
   isLoading,
   showAlertBanner: isError,
   columnFilters,
   sorting,
+  pagination,
 },
     muiSelectCheckboxProps: ({ row }) => ({
       checked: !!rowSelection[row.id],
@@ -1350,7 +1368,7 @@ incomeData.cashFlow = {
         </tr>
       </thead>
  
-      <tbody>
+      <tbody>-
         {people.map((person, index) => (
           <tr key={index}>
             <td style={tdStyle}>

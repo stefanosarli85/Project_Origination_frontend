@@ -10,15 +10,46 @@ import NotFoundPage from "./pages/NotFoundPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import Home from "./pages/Home";
-
+import LandingPage from "./pages/LandingPage";
+import KycCheck from "./pages/KycCheck";
+import PersonKyc from "./pages/PersonKyc";
+import CompanyKyc from "./pages/CompanyKyc";
+import KycResult from "./pages/KycResult";
 import "./App.css";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import CompanyKycResult from "./pages/CompanyKycResult";
 
 function App() {
   const router = createBrowserRouter([
     {
-      path: "/",
-      element: <Home />,
-    },
+  path: "/",
+  element: <LandingPage />,
+},
+{
+  path: "/search-companies",
+  element: <Home />,
+},
+{
+  path: "/kyc-result",
+  element: <KycResult />,
+},
+{
+  path: "/kyc-check",
+  element: <KycCheck />,
+},
+{
+  path: "/kyc-person",
+  element: <PersonKyc />,
+},
+{
+  path: "/kyc-company",
+  element: <CompanyKyc />,
+},
+{
+  path: "/company-kyc-result",
+  element: <CompanyKycResult />,
+},
     {
       path: "/selected-companies",
       element: <SelectedCompanies />,
@@ -52,9 +83,17 @@ function App() {
       path: "*",
       element: <NotFoundPage />,
     },
-  ]);
+    ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <ToastContainer
+        position="top-right"
+        autoClose={4000}
+      />
+    </>
+  );
 }
 
 export default App;
