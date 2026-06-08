@@ -250,6 +250,7 @@ const [selectedSchedules, setSelectedSchedules] =
  
  
   const [columnFilters, setColumnFilters] = useState([]);
+  const [sorting, setSorting] = useState([]);
  
   useEffect(() => {
     const fetchData = async () => {
@@ -312,18 +313,56 @@ const [selectedSchedules, setSelectedSchedules] =
             }
           }
         });
+        if (sorting.length > 0) {
+          console.log("SORTING OBJECT", sorting);
+console.log("SORT COLUMN", sorting[0]?.id);
+  const sortColumn = sorting[0].id;
+
+  const sortMap = {
+    ricavi_operativi_2024: "revenue",
+    ebit_2024: "ebit",
+    numero_dipendenti_2024: "employees",
+    denominazione: "company_name",
+    comune: "city",
+    codice_fiscale: "id",
+  };
+
+  params.append(
+    "sort_by",
+    sortMap[sortColumn] || "id"
+  );
+
+  params.append(
+    "sort_order",
+    sorting[0].desc ? "desc" : "asc"
+  );
+    params.append("page", "1");
+  params.append("limit", "100");
+}
  
-        const url = hasFilters
-          ? `http://43.205.207.160:1701/api/italy-search-columns?${params.toString()}`
-          : `http://43.205.207.160:1701/api/italy-get-all-records?page=1`;
- 
+        const hasSorting = sorting.length > 0;
+
+const url =
+  hasFilters || hasSorting
+    ? `http://43.205.207.160:1701/api/italy-search-columns?${params.toString()}`
+    : `http://43.205.207.160:1701/api/italy-get-all-records?page=1`;
         console.log("API URL:", url);
  
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch data");
  
         const json = await response.json();
+        console.log("TOTAL:", json.total);
+console.log("FIRST COMPANY:", json.data?.[0]?.denominazione);
+console.log("FIRST REVENUE:", json.data?.[0]?.ricavi_operativi_2024);
         console.log("API RESPONSE:", json);
+        console.log("TOTAL RECORDS RECEIVED:", json.data?.length);
+console.log("FIRST RECORD:", json.data?.[0]);
+
+        
+
+        
+
  
         setData(json.data || []);
         setIsError(false);
@@ -336,7 +375,7 @@ const [selectedSchedules, setSelectedSchedules] =
     };
  
     fetchData();
-  }, [columnFilters]);
+}, [columnFilters, sorting]);
  
   const columns = useMemo(
     () => [
@@ -486,8 +525,16 @@ const [isDownloading, setIsDownloading] = useState(false);
     positionActionsColumn: "last",
     manualFiltering: true,
     onColumnFiltersChange: setColumnFilters,
+    onSortingChange: setSorting,
+manualSorting: true,
     getRowId: (row) => row.codice_fiscale,
-    state: { rowSelection, isLoading, showAlertBanner: isError, columnFilters },
+  state: {
+  rowSelection,
+  isLoading,
+  showAlertBanner: isError,
+  columnFilters,
+  sorting,
+},
     muiSelectCheckboxProps: ({ row }) => ({
       checked: !!rowSelection[row.id],
       onChange: () => handleRowSelection(row.id),
