@@ -798,6 +798,11 @@ const handleFetchNews = async () => {
   totalAssets: {},
 };
 assetsData.forEach((item) => {
+  console.log("ASSET ROW", item);
+console.log(
+  "DISPONIBILITA LIQUIDE",
+  item.disponibilita_liquide
+);
   const year = item.financial_year;
  
   assetsTableData.intangibleAssets[year] =
@@ -858,6 +863,12 @@ if (isSearchData) {
     2023: searchData?.disponibilita_liquide_2023,
     2024: searchData?.disponibilita_liquide_2024,
   };
+  console.log(
+  "LIQUIDE VALUES",
+  searchData?.disponibilita_liquide_2022,
+  searchData?.disponibilita_liquide_2023,
+  searchData?.disponibilita_liquide_2024
+);
 }
 
 const liabilitiesData =
@@ -872,6 +883,7 @@ const liabilitiesTableData = {
   employeeSeveranceFund: {},
   totalPayables: {},
   payables12Months: {},
+  payablesBeyond12Months: {},
   accruedLiabilities: {},
   totalLiabilities: {},
 };
@@ -955,6 +967,11 @@ liabilitiesTableData.retainedEarnings = {
     2023: searchData?.debiti_entro_12_mesi_2023,
     2024: searchData?.debiti_entro_12_mesi_2024,
   };
+  liabilitiesTableData.payablesBeyond12Months = {
+  2022: searchData?.debiti_oltre_12_mesi_2022,
+  2023: searchData?.debiti_oltre_12_mesi_2023,
+  2024: searchData?.debiti_oltre_12_mesi_2024,
+};
 
   liabilitiesTableData.accruedLiabilities = {
     2022: searchData?.accrued_liabilities_2022,
@@ -1816,13 +1833,13 @@ incomeData.cashFlow = {
         </tr>
  
         <tr>
-          <td style={tdStyle}>
-            Payables within 12 Months
-          </td>
-          {renderYearData(
-            liabilitiesTableData.payables12Months
-          )}
-        </tr>
+  <td style={tdStyle}>
+    Payables beyond 12 Months
+  </td>
+  {renderYearData(
+    liabilitiesTableData.payablesBeyond12Months
+  )}
+</tr>
  
         <tr>
           <td style={tdStyle}>
