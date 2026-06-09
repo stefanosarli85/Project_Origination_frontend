@@ -49,15 +49,19 @@ const FIELD_GROUPS = [
     ],
   },
   {
-    label: "Industry",
-    icon: <FactoryIcon fontSize="small" />,
-    accent: "#e65100",
-    bg: "#fff3e0",
-    keys: [
-      "codice_ateco", "descrizione_ateco",
-      "codice_ateco_secondario", "attivita_prevalente",
-    ],
-  },
+  label: "Industry",
+  icon: <FactoryIcon fontSize="small" />,
+  accent: "#e65100",
+  bg: "#fff3e0",
+  keys: [
+    "codice_ateco",
+    "main_industry",
+    "sub_industry",
+    "descrizione_ateco",
+    "codice_ateco_secondario",
+    "attivita_prevalente",
+  ],
+},
  
   {
     label: "Registry & Legal",
@@ -533,6 +537,8 @@ navigate("/italy-reports", {
   }
 };
 const [isDownloading, setIsDownloading] = useState(false);
+const [isFetchingNews, setIsFetchingNews] =
+  useState(false);
   const table = useMaterialReactTable({
     columns,
     data,
@@ -641,6 +647,26 @@ manualSorting: true,
         ? "Downloading..."
         : "Download Report"}
     </button>
+    <button
+  onClick={handleFetchNews}
+  disabled={
+    table.getSelectedRowModel().rows.length === 0 ||
+    isFetchingNews
+  }
+  style={{
+    padding: "10px 16px",
+    background: "#2563eb",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  {isFetchingNews
+    ? "Fetching News..."
+    : "Fetch News"}
+</button>
   </div>
 ),
     muiToolbarAlertBannerProps: isError
@@ -685,6 +711,42 @@ const handleDownload = async () => {
     alert("Failed to download report");
   } finally {
     setIsDownloading(false);
+  }
+};
+
+const handleFetchNews = async () => {
+  try {
+    setIsFetchingNews(true);
+
+    const selectedRow =
+      table.getSelectedRowModel().rows[0];
+
+    if (!selectedRow) {
+      alert("Please select a company");
+      return;
+    }
+
+    const companyName =
+      selectedRow.original.denominazione;
+
+    const response = await fetch(
+      `${BASE_URL}/api/fetch-news?company_name=${encodeURIComponent(
+        companyName
+      )}`
+    );
+
+    const newsData = await response.json();
+
+    console.log("NEWS RESPONSE", newsData);
+
+    navigate("/company-news", {
+      state: newsData,
+    });
+  } catch (error) {
+    console.error(error);
+    alert("Failed to fetch news");
+  } finally {
+    setIsFetchingNews(false);
   }
 };
  
@@ -1262,66 +1324,7 @@ incomeData.cashFlow = {
             ))}
  
           {/* Overflow / ungrouped fields */}
-          <Box
-  sx={{
-    border: "1px solid #e0e0e0",
-    borderLeft: "4px solid #1565c0",
-    borderRadius: "8px",
-    overflow: "hidden",
-    mb: 2,
-  }}
->
-  <Box
-    sx={{
-      px: 2,
-      py: 1,
-      background: "#e3f2fd",
-    }}
-  >
-    <Typography
-      variant="caption"
-      fontWeight={700}
-      sx={{
-        color: "#1565c0",
-        textTransform: "uppercase",
-        letterSpacing: 1,
-      }}
-    >
-      PFN (Net Financial Position)
-    </Typography>
-  </Box>
-
-  <table
-    style={{
-      width: "100%",
-      borderCollapse: "collapse",
-    }}
-  >
-    <thead>
-      <tr>
-        <th style={thStyle}>Financial Item</th>
-        <th style={thStyle}>2022</th>
-        <th style={thStyle}>2023</th>
-        <th style={thStyle}>2024</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      <tr>
-        <td style={tdStyle}>PFN</td>
-        <td style={tdStyle}>
-          {Number(selectedRowData?.pfn_2022 || 0).toLocaleString("en-US")}
-        </td>
-        <td style={tdStyle}>
-          {Number(selectedRowData?.pfn_2023 || 0).toLocaleString("en-US")}
-        </td>
-        <td style={tdStyle}>
-          {Number(selectedRowData?.pfn_2024 || 0).toLocaleString("en-US")}
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</Box>
+         
  
           {people.length > 0 && (
   <Box
@@ -1840,6 +1843,67 @@ incomeData.cashFlow = {
     </table>
    
   </div>
+   <Box
+  sx={{
+    border: "1px solid #e0e0e0",
+    borderLeft: "4px solid #1565c0",
+    borderRadius: "8px",
+    overflow: "hidden",
+    mb: 2,
+  }}
+>
+  <Box
+    sx={{
+      px: 2,
+      py: 1,
+      background: "#e3f2fd",
+    }}
+  >
+    <Typography
+      variant="caption"
+      fontWeight={700}
+      sx={{
+        color: "#1565c0",
+        textTransform: "uppercase",
+        letterSpacing: 1,
+      }}
+    >
+      PFN (Net Financial Position)
+    </Typography>
+  </Box>
+
+  <table
+    style={{
+      width: "100%",
+      borderCollapse: "collapse",
+    }}
+  >
+    <thead>
+      <tr>
+        <th style={thStyle}>Financial Item</th>
+        <th style={thStyle}>2022</th>
+        <th style={thStyle}>2023</th>
+        <th style={thStyle}>2024</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td style={tdStyle}>PFN</td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2022 || 0).toLocaleString("en-US")}
+        </td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2023 || 0).toLocaleString("en-US")}
+        </td>
+        <td style={tdStyle}>
+          {Number(selectedRowData?.pfn_2024 || 0).toLocaleString("en-US")}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</Box>
+
  
  
         </DialogContent>
