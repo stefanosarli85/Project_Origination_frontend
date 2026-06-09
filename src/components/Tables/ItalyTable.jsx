@@ -1831,6 +1831,14 @@ incomeData.cashFlow = {
             liabilitiesTableData.totalPayables
           )}
         </tr>
+        <tr>
+  <td style={tdStyle}>
+    Payables within 12 Months
+  </td>
+  {renderYearData(
+    liabilitiesTableData.payables12Months
+  )}
+</tr>
  
         <tr>
   <td style={tdStyle}>
