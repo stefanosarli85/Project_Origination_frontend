@@ -613,7 +613,7 @@ manualSorting: true,
   onClick={() => {
     sessionStorage.removeItem("currentStep");
     sessionStorage.removeItem("currentRegion");
-    window.location.reload();
+    navigate("/");
   }}
   style={{
     padding: "10px 16px",
