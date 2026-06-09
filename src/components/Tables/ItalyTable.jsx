@@ -613,7 +613,7 @@ manualSorting: true,
   onClick={() => {
     sessionStorage.removeItem("currentStep");
     sessionStorage.removeItem("currentRegion");
-    navigate("/");
+    window.location.href = "/search-companies";
   }}
   style={{
     padding: "10px 16px",
