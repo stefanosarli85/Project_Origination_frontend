@@ -17,10 +17,12 @@ const navigate = useNavigate();
         <h3>No news data found.</h3>
 
        <button
-  onClick={() => {
-    console.log("BACK CLICKED");
-    navigate("/search-companies");
-  }}
+ onClick={() => {
+  sessionStorage.setItem("currentStep", "2");
+  sessionStorage.setItem("currentRegion", "Italy");
+
+  navigate("/search-companies");
+}}
 >
   Back
 </button>
@@ -233,7 +235,12 @@ const navigate = useNavigate();
       ))}
 
       <button
-  onClick={() => navigate("/search-companies")}
+ onClick={() => {
+  sessionStorage.setItem("currentStep", "2");
+  sessionStorage.setItem("currentRegion", "Italy");
+
+  navigate("/search-companies");
+}}
   style={{
     padding: "10px 18px",
     border: "none",

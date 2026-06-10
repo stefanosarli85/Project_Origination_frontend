@@ -627,7 +627,11 @@ manualSorting: true,
  <button
   onClick={() => {
     console.log("BACK BUTTON CLICKED");
-   window.location.assign("/search-companies");
+
+    sessionStorage.removeItem("currentStep");
+    sessionStorage.removeItem("currentRegion");
+
+    window.location.assign("/search-companies");
   }}
   style={{
     padding: "10px 16px",
@@ -640,7 +644,7 @@ manualSorting: true,
   }}
 >
   ← Back to Landing Page
-</button>
+</button>``
     <button
       onClick={handleDownload}
       disabled={
