@@ -262,7 +262,21 @@ const [pagination, setPagination] = useState({
   pageIndex: 0,
   pageSize: 100,
 });
- 
+ useEffect(() => {
+  const savedState = sessionStorage.getItem("italyTableState");
+
+  if (savedState) {
+    const state = JSON.parse(savedState);
+
+    setPagination({
+      pageIndex: state.pageIndex || 0,
+      pageSize: state.pageSize || 100,
+    });
+
+    setColumnFilters(state.filters || []);
+    setSorting(state.sorting || []);
+  }
+}, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -352,7 +366,9 @@ console.log("SORT COLUMN", sorting[0]?.id);
     "sort_order",
     sorting[0].desc ? "desc" : "asc"
   );
-   params.append(
+  
+}
+params.append(
   "page",
   String(pagination.pageIndex + 1)
 );
@@ -361,7 +377,6 @@ params.append(
   "limit",
   String(pagination.pageSize)
 );
-}
  
         const hasSorting = sorting.length > 0;
 
@@ -737,11 +752,21 @@ const handleFetchNews = async () => {
 
     const newsData = await response.json();
 
-    console.log("NEWS RESPONSE", newsData);
+console.log("NEWS RESPONSE", newsData);
 
-    navigate("/company-news", {
-      state: newsData,
-    });
+sessionStorage.setItem(
+  "italyTableState",
+  JSON.stringify({
+    pageIndex: pagination.pageIndex,
+    pageSize: pagination.pageSize,
+    filters: columnFilters,
+    sorting: sorting,
+  })
+);
+
+navigate("/company-news", {
+  state: newsData,
+});
   } catch (error) {
     console.error(error);
     alert("Failed to fetch news");
@@ -863,6 +888,11 @@ if (isSearchData) {
     2023: searchData?.disponibilita_liquide_2023,
     2024: searchData?.disponibilita_liquide_2024,
   };
+  console.log(
+  "CASH EQUIVALENTS MAPPING",
+  assetsTableData.cashEquivalents
+);
+
   console.log(
   "LIQUIDE VALUES",
   searchData?.disponibilita_liquide_2022,
@@ -1189,6 +1219,8 @@ incomeData.cashFlow = {
 
   console.log("IS SEARCH DATA", isSearchData);
   console.log("SEARCH DATA", searchData);
+
+  
 }
   return (
     <>

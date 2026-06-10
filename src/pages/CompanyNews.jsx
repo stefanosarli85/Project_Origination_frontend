@@ -4,8 +4,10 @@ import { HiOutlineNewspaper } from "react-icons/hi";
 import { MdOutlineDateRange } from "react-icons/md";
 
 const CompanyNews = () => {
+  
   const location = useLocation();
-  const navigate = useNavigate();
+console.log("CURRENT PATH:", location.pathname);
+const navigate = useNavigate();
 
   const newsData = location.state;
 
@@ -14,12 +16,14 @@ const CompanyNews = () => {
       <div className="container py-5">
         <h3>No news data found.</h3>
 
-        <button
-          className="btn btn-primary mt-3"
-          onClick={() => navigate(-1)}
-        >
-          Back
-        </button>
+       <button
+  onClick={() => {
+    console.log("BACK CLICKED");
+    navigate("/search-companies");
+  }}
+>
+  Back
+</button>
       </div>
     );
   }
@@ -216,19 +220,19 @@ const CompanyNews = () => {
       ))}
 
       <button
-        onClick={() => navigate(-1)}
-        style={{
-          padding: "10px 18px",
-          border: "none",
-          borderRadius: "8px",
-          background: "#64748b",
-          color: "#fff",
-          cursor: "pointer",
-          marginTop: "10px",
-        }}
-      >
-        Back
-      </button>
+  onClick={() => navigate("/search-companies")}
+  style={{
+    padding: "10px 18px",
+    border: "none",
+    borderRadius: "8px",
+    background: "#64748b",
+    color: "#fff",
+    cursor: "pointer",
+    marginTop: "10px",
+  }}
+>
+  Back
+</button>
     </div>
   );
 };
