@@ -753,6 +753,7 @@ const handleFetchNews = async () => {
     const newsData = await response.json();
 
 console.log("NEWS RESPONSE", newsData);
+console.log("FIRST ARTICLE", newsData.articles?.[0]);
 
 sessionStorage.setItem(
   "italyTableState",

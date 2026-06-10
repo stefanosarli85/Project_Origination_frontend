@@ -122,14 +122,27 @@ const navigate = useNavigate();
           }}
         >
           <div style={{ flex: 1 }}>
-            <h3
-              style={{
-                marginBottom: "12px",
-                color: "#0f172a",
-              }}
-            >
-              {article.title}
-            </h3>
+          <h3
+  style={{
+    marginBottom: "8px",
+    color: "#0f172a",
+  }}
+>
+  {article.title}
+</h3>
+
+<p
+  style={{
+    color: "#64748b",
+    fontSize: "13px",
+    marginBottom: "12px",
+  }}
+>
+  <MdOutlineDateRange
+    style={{ marginRight: "5px" }}
+  />
+  {article.published?.split(" ").slice(1, 4).join(" ")}
+</p>
 
             <p
               style={{
