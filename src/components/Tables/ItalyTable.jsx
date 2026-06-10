@@ -626,9 +626,8 @@ manualSorting: true,
     </button>
  <button
   onClick={() => {
-    sessionStorage.removeItem("currentStep");
-    sessionStorage.removeItem("currentRegion");
-    window.location.href = "/search-companies";
+    console.log("BACK BUTTON CLICKED");
+   window.location.assign("/search-companies");
   }}
   style={{
     padding: "10px 16px",

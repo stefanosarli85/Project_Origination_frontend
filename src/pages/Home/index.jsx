@@ -12,14 +12,14 @@ const [currentStep, setCurrentStep] = useState(
 const [currentRegion, setCurrentRegion] = useState(
   sessionStorage.getItem("currentRegion") || ""
 );
-useEffect(() => {
-  if (currentStep === 2 && currentRegion === "Italy") {
-    setTimeout(() => {
-      sessionStorage.removeItem("currentStep");
-      sessionStorage.removeItem("currentRegion");
-    }, 1000);
-  }
-}, [currentStep, currentRegion]);
+// useEffect(() => {
+//   if (currentStep === 2 && currentRegion === "Italy") {
+//     setTimeout(() => {
+//       sessionStorage.removeItem("currentStep");
+//       sessionStorage.removeItem("currentRegion");
+//     }, 1000);
+//   }
+// }, [currentStep, currentRegion]);
   const handleNext = (porops) => {
     setCurrentRegion(porops);
     if (currentStep < 3) {
