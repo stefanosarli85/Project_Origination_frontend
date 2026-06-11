@@ -206,7 +206,7 @@ const SectionCard = ({ group, data }) => {
 };
  
 // ─── Main component ──────────────────────────────────────────────────────────
-const ItalyTable = () => {
+                                                                  const ItalyTable = () => {
   const navigate = useNavigate();
  
   const [data, setData] = useState([]);
@@ -574,8 +574,30 @@ navigate("/italy-reports", {
   }
 };
 const [isDownloading, setIsDownloading] = useState(false);
+const [isReportAvailable, setIsReportAvailable] =
+  useState(false);
 const [isFetchingNews, setIsFetchingNews] =
   useState(false);
+  useEffect(() => {
+  const selectedCompanyCode =
+    Object.keys(rowSelection)[0];
+
+  if (!selectedCompanyCode) {
+    setIsReportAvailable(false);
+    return;
+  }
+
+  fetch(
+    `${BASE_URL}/api/isDocumentAvailable/${selectedCompanyCode}`
+  )
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("STATUS API", data);
+      setIsReportAvailable(data.isReportAvailable);
+    })
+    .catch(console.error);
+}, [rowSelection]);
+  
   const table = useMaterialReactTable({
     columns,
     data,
@@ -668,47 +690,47 @@ manualSorting: true,
   }}
 >
   ← Back to Landing Page
-</button>``
-    <button
-      onClick={handleDownload}
-      disabled={
-        table.getSelectedRowModel().rows.length === 0 ||
-        isDownloading
-      }
-      style={{
-        padding: "10px 16px",
-        background: "#16a34a",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontWeight: "bold",
-      }}
-    >
-      {isDownloading
-        ? "Downloading..."
-        : "Download Report"}
-    </button>
-    <button
-  onClick={handleFetchNews}
-  disabled={
-    table.getSelectedRowModel().rows.length === 0 ||
-    isFetchingNews
-  }
-  style={{
-    padding: "10px 16px",
-    background: "#2563eb",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  }}
->
-  {isFetchingNews
-    ? "Fetching News..."
-    : "Fetch News"}
 </button>
+    {table.getSelectedRowModel().rows.length > 0 && (
+  <button
+    onClick={handleDownload}
+    disabled={isDownloading}
+    style={{
+      padding: "10px 16px",
+      background: isReportAvailable
+        ? "#16a34a"
+        : "#dc2626",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    {isDownloading
+  ? "Downloading..."
+  : "Download Report"}
+  </button>
+)}
+    {table.getSelectedRowModel().rows.length > 0 && (
+  <button
+    onClick={handleFetchNews}
+    disabled={isFetchingNews}
+    style={{
+      padding: "10px 16px",
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    {isFetchingNews
+      ? "Fetching News..."
+      : "Fetch News"}
+  </button>
+)}
   </div>
 ),
     muiToolbarAlertBannerProps: isError
@@ -729,15 +751,34 @@ const handleDownload = async () => {
       return;
     }
  
-    const companyCode =
-      selectedRow.original.codice_fiscale;
- 
-    const response = await fetch(
-      `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
-      {
-        method: "POST",
-      }
-    );
+   const companyCode =
+  selectedRow.original.codice_fiscale;
+
+// CHECK STATUS FIRST
+const statusResponse = await fetch(
+  `${BASE_URL}/api/isDocumentAvailable/${companyCode}`
+);
+
+const statusData = await statusResponse.json();
+
+console.log("STATUS DATA", statusData);
+
+setIsReportAvailable(statusData.isReportAvailable);
+
+if (statusData.isReportAvailable) {
+  alert("Data Available");
+} else {
+  alert("Generating New Report");
+}
+console.log(typeof statusData.isReportAvailable);
+
+//  DOWNLOAD API
+const response = await fetch(
+  `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
+  {
+    method: "POST",
+  }
+);
  
     const data = await response.json();
  
