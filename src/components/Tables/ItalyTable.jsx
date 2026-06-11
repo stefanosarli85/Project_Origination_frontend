@@ -609,12 +609,29 @@ const [isFetchingNews, setIsFetchingNews] =
 
   checkStatus();
 }, [rowSelection]);
-  
   const table = useMaterialReactTable({
-    columns,
-    data,
-    enableRowSelection: true,
-    
+  columns,
+  data,
+
+  muiTopToolbarProps: {
+    sx: {
+      position: "sticky",
+      top: 0,
+      zIndex: 1000,
+      backgroundColor: "#fff",
+    },
+  },
+
+  muiTableContainerProps: {
+    sx: {
+      maxHeight: "75vh",
+    },
+  },
+
+  enableStickyHeader: true,
+
+  enableRowSelection: true,
+
     enableMultiRowSelection: false,
     onRowSelectionChange: setRowSelection,
     enablePagination: true,
@@ -658,11 +675,17 @@ manualSorting: true,
         <InfoOutlinedIcon fontSize="small" />
       </IconButton>
     ),
-    renderTopToolbarCustomActions: () => (
+   renderTopToolbarCustomActions: () => (
   <div
     style={{
       display: "flex",
       gap: "10px",
+      position: "sticky",
+      top: "0",
+      zIndex: 1000,
+      background: "#fff",
+      padding: "10px",
+      borderBottom: "1px solid #e5e7eb",
     }}
   >
     <button
