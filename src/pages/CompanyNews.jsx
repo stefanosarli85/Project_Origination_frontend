@@ -29,6 +29,10 @@ const navigate = useNavigate();
       </div>
     );
   }
+  const sortedArticles = [...(newsData.articles || [])].sort(
+  (a, b) =>
+    new Date(b.published) - new Date(a.published)
+);
 
   return (
     <div
@@ -106,8 +110,7 @@ const navigate = useNavigate();
     </span>
   </div>
 </div>
-      {/* News Cards */}
-      {newsData.articles?.map((article, index) => (
+      {/* News Cards */}{sortedArticles.map((article, index) => (
         <div
           key={index}
           style={{
