@@ -774,30 +774,33 @@ const handleDownload = async () => {
   selectedRow.original.codice_fiscale;
 
 // CHECK STATUS FIRST
-const statusResponse = await fetch(
-  `${BASE_URL}/api/isDocumentAvailable/${companyCode}`
+console.log(
+  "isReportAvailable:",
+  isReportAvailable
 );
 
-const statusData = await statusResponse.json();
-
-console.log("STATUS DATA", statusData);
-
-setIsReportAvailable(statusData.isReportAvailable);
-
-if (statusData.isReportAvailable) {
-  alert("Data Available");
-} else {
+if (isReportAvailable === false) {
   alert("Generating New Report");
-}
-console.log(typeof statusData.isReportAvailable);
 
-//  DOWNLOAD API
-const response = await fetch(
-  `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
-  {
-    method: "POST",
+  const response = await fetch(
+    `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
+    {
+      method: "POST",
+    }
+  );
+
+  const data = await response.json();
+
+  const fileUrl = data?.s3_url;
+
+  if (!fileUrl) {
+    throw new Error("No file URL found");
   }
-);
+
+  window.open(fileUrl, "_blank");
+} else {
+  alert("Data Available");
+}
  
     const data = await response.json();
  
