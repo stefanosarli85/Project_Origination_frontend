@@ -705,27 +705,7 @@ manualSorting: true,
     >
       Fetch Financial Reports
     </button>
- <button
-  onClick={() => {
-    console.log("BACK BUTTON CLICKED");
-
-    sessionStorage.removeItem("currentStep");
-    sessionStorage.removeItem("currentRegion");
-
-    window.location.assign("/search-companies");
-  }}
-  style={{
-    padding: "10px 16px",
-    background: "#6b7280",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  }}
->
-  ← Back to Landing Page
-</button>
+ 
    {table.getSelectedRowModel().rows.length > 0 &&
  isReportAvailable !== null && (
 <button
@@ -1332,6 +1312,25 @@ incomeData.cashFlow = {
 }
   return (
     <>
+   <button
+  onClick={() => {
+    sessionStorage.removeItem("currentStep");
+    sessionStorage.removeItem("currentRegion");
+    window.location.assign("/search-companies");
+  }}
+  style={{
+    background: "transparent",
+    color: "#1976d2",
+    border: "none",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "14px",
+    padding: "0",
+    marginBottom: "12px",
+  }}
+>
+  ← Back to Landing Page
+</button>
       <MaterialReactTable table={table} />
  
       <Dialog
