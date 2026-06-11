@@ -574,28 +574,40 @@ navigate("/italy-reports", {
   }
 };
 const [isDownloading, setIsDownloading] = useState(false);
-const [isReportAvailable, setIsReportAvailable] =
-  useState(false);
+const [isReportAvailable, setIsReportAvailable] = useState(null);
 const [isFetchingNews, setIsFetchingNews] =
   useState(false);
-  useEffect(() => {
-  const selectedCompanyCode =
-    Object.keys(rowSelection)[0];
+ useEffect(() => {
+  const selectedRow =
+    table?.getSelectedRowModel()?.rows?.[0];
 
-  if (!selectedCompanyCode) {
-    setIsReportAvailable(false);
+  if (!selectedRow) {
+    setIsReportAvailable(null);
     return;
   }
 
-  fetch(
-    `${BASE_URL}/api/isDocumentAvailable/${selectedCompanyCode}`
-  )
-    .then((res) => res.json())
-    .then((data) => {
+  const companyCode =
+    selectedRow.original.codice_fiscale;
+
+  const checkStatus = async () => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/api/isDocumentAvailable/${companyCode}`
+      );
+
+      const data = await response.json();
+
       console.log("STATUS API", data);
-      setIsReportAvailable(data.isReportAvailable);
-    })
-    .catch(console.error);
+
+      setIsReportAvailable(
+        data.isReportAvailable
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  checkStatus();
 }, [rowSelection]);
   
   const table = useMaterialReactTable({
@@ -691,26 +703,30 @@ manualSorting: true,
 >
   ← Back to Landing Page
 </button>
-    {table.getSelectedRowModel().rows.length > 0 && (
-  <button
-    onClick={handleDownload}
-    disabled={isDownloading}
-    style={{
-      padding: "10px 16px",
-      background: isReportAvailable
+   {table.getSelectedRowModel().rows.length > 0 &&
+ isReportAvailable !== null && (
+<button
+  onClick={handleDownload}
+  disabled={isDownloading}
+  style={{
+    padding: "10px 16px",
+    background:
+      isReportAvailable === true
         ? "#16a34a"
         : "#dc2626",
-      color: "white",
-      border: "none",
-      borderRadius: "6px",
-      cursor: "pointer",
-      fontWeight: "bold",
-    }}
-  >
-    {isDownloading
-  ? "Downloading..."
-  : "Download Report"}
-  </button>
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  {isDownloading
+    ? "Downloading..."
+    : isReportAvailable === true
+    ? "Fetch Report"
+    : "Download Report"}
+</button>
 )}
     {table.getSelectedRowModel().rows.length > 0 && (
   <button
