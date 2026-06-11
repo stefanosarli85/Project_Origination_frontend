@@ -223,6 +223,8 @@ const ItalyTable = () => {
  
 const [selectedSchedules, setSelectedSchedules] =
   useState([]);
+  const [scheduleStatus, setScheduleStatus] =
+  useState({});
   const SCHEDULES = [
   { code: "05", label: "Company Overview" },
   { code: "10", label: "Financial Statement (Income Statement)" },
@@ -487,13 +489,33 @@ setModalOpen(true);
     console.error(error);
   }
 };
- const handleFetchReports = () => {
+const handleFetchReports = async () => {
   const selectedRow =
     table.getSelectedRowModel().rows[0];
- const searchData = selectedRow.original;
+
   if (!selectedRow) return;
- 
-  setScheduleDialogOpen(true);
+
+  try {
+    const companyCode =
+      selectedRow.original.codice_fiscale;
+
+    const response = await fetch(
+      `http://43.205.207.160:1701/api/get-schedule-status/${companyCode}`
+    );
+
+    const data = await response.json();
+
+    console.log("SCHEDULE STATUS", data);
+
+    setScheduleStatus(
+      data[companyCode] || {}
+    );
+
+    setScheduleDialogOpen(true);
+  } catch (error) {
+    console.error(error);
+    setScheduleDialogOpen(true);
+  }
 };
 const handleScheduleToggle = (code) => {
   setSelectedSchedules((prev) =>
@@ -2029,9 +2051,33 @@ incomeData.cashFlow = {
           }}
         />
  
-        <Typography>
-          {item.label}
-        </Typography>
+        <Box
+  sx={{
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+  }}
+>
+  <Typography>
+    {item.label}
+  </Typography>
+
+{scheduleStatus[
+  ["05", "10", "20", "30", "40", "50", "60", "70"].includes(item.code)
+    ? `S${item.code}`
+    : item.code
+] && (
+  <span
+    style={{
+      color: "green",
+      fontWeight: "bold",
+      fontSize: "18px",
+    }}
+  >
+    ✓
+  </span>
+)}
+</Box>
       </Box>
     ))}
  
