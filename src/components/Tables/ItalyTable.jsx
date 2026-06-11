@@ -444,7 +444,7 @@ setIsError(false);
     []
   );
  
-  const handleRowSelection = (rowId) => setRowSelection({ [rowId]: true });
+  // const handleRowSelection = (rowId) => setRowSelection({ [rowId]: true });
  
   const handleInfoClick = async (row) => {
   try {
@@ -580,7 +580,9 @@ const [isFetchingNews, setIsFetchingNews] =
     columns,
     data,
     enableRowSelection: true,
+    
     enableMultiRowSelection: false,
+    onRowSelectionChange: setRowSelection,
     enablePagination: true,
     enableSorting: true,
     enableColumnFilters: true,
@@ -603,10 +605,10 @@ manualSorting: true,
   sorting,
   pagination,
 },
-    muiSelectCheckboxProps: ({ row }) => ({
-      checked: !!rowSelection[row.id],
-      onChange: () => handleRowSelection(row.id),
-    }),
+    // muiSelectCheckboxProps: ({ row }) => ({
+    //   checked: !!rowSelection[row.id],
+    //   onChange: () => handleRowSelection(row.id),
+    // }),
     initialState: {
       pagination: { pageIndex: 0, pageSize: 10 },
       showColumnFilters: true,
