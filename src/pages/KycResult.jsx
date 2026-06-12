@@ -3,10 +3,12 @@ import { toast } from "react-toastify";
 import { useEffect } from "react";
 
 const KycResult = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+ const location = useLocation();
+const navigate = useNavigate();
 
-  const kycResult = location.state;
+console.log("LOCATION STATE", location.state);
+
+const kycResult = location.state;
 
   if (!kycResult) {
     return (
@@ -21,10 +23,19 @@ const KycResult = () => {
       </div>
     );
   }
+const entitiesCount =
+  kycResult.entities?.length || 0;
 
-  const isClean =
-    kycResult.entities?.length === 0 &&
-    kycResult.evidences?.length === 0;
+const evidencesCount =
+  kycResult.evidences?.length || 0;
+
+const isClean =
+  entitiesCount === 0 &&
+  evidencesCount === 0;
+
+console.log("Entities:", entitiesCount);
+console.log("Evidences:", evidencesCount);
+console.log("Is Clean:", isClean);
     useEffect(() => {
   if (isClean) {
     toast.success("KYC Check Completed. No matches found.");

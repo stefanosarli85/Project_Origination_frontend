@@ -20,6 +20,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CompanyKycResult from "./pages/CompanyKycResult";
 import CompanyNews from "./pages/CompanyNews";
+import KycRegionSelection from "./pages/KycRegionSelection";
 
 function App() {
   const router = createBrowserRouter([
@@ -54,6 +55,10 @@ function App() {
 {
   path: "/company-news",
   element: <CompanyNews />,
+},
+{
+  path: "/kyc-region",
+  element: <KycRegionSelection />,
 },
     {
       path: "/selected-companies",

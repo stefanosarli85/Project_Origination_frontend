@@ -5,7 +5,7 @@ const PersonKyc = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
-  const [kycResult, setKycResult] = useState(null);
+ 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -13,7 +13,7 @@ const PersonKyc = () => {
 
   try {
     const response = await fetch(
-      "http://43.205.207.160:1701/api/kyc-check",
+      "http://43.205.207.160:1701/api/global/kyc-check",
       {
         method: "POST",
         headers: {
@@ -30,7 +30,8 @@ const PersonKyc = () => {
 const result = await response.json();
 
 console.log("STATUS:", response.status);
-console.log("KYC RESULT:", result);
+console.log("DATA SENT TO RESULT PAGE", result.data);
+
     navigate("/kyc-result", {
   state: result.data,
 });
@@ -38,10 +39,9 @@ console.log("KYC RESULT:", result);
     console.error(error);
   }
 };
-  const isClean =
-  kycResult &&
-  kycResult.entities?.length === 0 &&
-  kycResult.evidences?.length === 0;
+
+
+
 
 
 
@@ -100,44 +100,8 @@ console.log("KYC RESULT:", result);
             Check KYC
           </button>
         </form>
-        {kycResult && (
-  <div
-    style={{
-      marginTop: "20px",
-      padding: "15px",
-      borderRadius: "10px",
-      background: isClean ? "#dcfce7" : "#fee2e2",
-      color: isClean ? "#166534" : "#991b1b",
-      fontWeight: "bold",
-    }}
-  >
-    {isClean
-      ? "✅ CLEAN"
-      : "⚠️ FLAGGED"}
-  </div>
-)}
-{kycResult && (
-  <table className="table table-bordered mt-3">
-    <tbody>
-      <tr>
-        <th>Status</th>
-        <td>{isClean ? "CLEAN" : "FLAGGED"}</td>
-      </tr>
-      <tr>
-        <th>State</th>
-        <td>{kycResult.state}</td>
-      </tr>
-      <tr>
-        <th>Type</th>
-        <td>{kycResult.type}</td>
-      </tr>
-      <tr>
-        <th>Search ID</th>
-        <td>{kycResult.id}</td>
-      </tr>
-    </tbody>
-  </table>
-)}
+
+
 
       </div>
     </div>

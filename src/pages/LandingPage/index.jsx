@@ -92,7 +92,7 @@ const LandingPage = () => {
 
           {/* KYC Check */}
           <div
-            onClick={() => navigate("/kyc-check")}
+         onClick={() => navigate("/kyc-region")}
             style={{
               flex: 1,
               background: "#fff",
