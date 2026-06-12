@@ -105,7 +105,7 @@ const KycRegionSelection = () => {
 
           {/* Italy */}
           <div
-            onClick={() => navigate("/italy-kyc")}
+            onClick={() => navigate("/kyc-region-select")}
             style={{
               width: "350px",
               background: "#fff",

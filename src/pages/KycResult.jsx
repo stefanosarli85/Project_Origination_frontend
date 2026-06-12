@@ -169,43 +169,44 @@ console.log("Is Clean:", isClean);
             {kycResult.evidences?.length > 0 ? (
               <table className="table table-bordered">
                 <thead>
-                  <tr>
-                    <th>List Description</th>
-                    <th>Publication Date</th>
-                    <th>Subject</th>
-                    <th>Offence</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
+  <tr>
+    <th>List Description</th>
+    <th>Publication Date</th>
+    <th>Subject</th>
+    <th>Offence</th>
+    <th>Status</th>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th>Links</th>
+  </tr>
+</thead>
 
                 <tbody>
                   {kycResult.evidences.flatMap(
                     (evidence, index) =>
                       evidence.rationales?.map(
                         (rationale, i) => (
-                          <tr key={`${index}-${i}`}>
-                            <td>
-                              {evidence.list_description?.join(
-                                ", "
-                              )}
-                            </td>
+                        <tr key={`${index}-${i}`}>
+  <td>{evidence.list_description?.join(", ")}</td>
 
-                            <td>
-                              {evidence.publication_date}
-                            </td>
+  <td>{evidence.publication_date}</td>
 
-                            <td>
-                              {rationale.subject}
-                            </td>
+  <td>{rationale.subject}</td>
 
-                            <td>
-                              {rationale.offence || "-"}
-                            </td>
+  <td>{rationale.offence || "-"}</td>
 
-                            <td>
-                              {rationale.status}
-                            </td>
-                          </tr>
+  <td>{rationale.status}</td>
+
+  <td>{rationale.date_start || "-"}</td>
+
+  <td>{rationale.date_end || "-"}</td>
+
+  <td>
+    {rationale.links?.length
+      ? rationale.links.join(", ")
+      : "-"}
+  </td>
+</tr>
                         )
                       )
                   )}

@@ -86,6 +86,28 @@ const CompanyKycResult = () => {
     <th>Company Name</th>
     <td>{kycResult.query?.name}</td>
   </tr>
+  <tr>
+  <th>Entity Type</th>
+  <td>{kycResult.query?.entityType}</td>
+</tr>
+
+<tr>
+  <th>Created On</th>
+  <td>
+    {new Date(
+      kycResult.creationTimestamp * 1000
+    ).toLocaleString()}
+  </td>
+</tr>
+
+<tr>
+  <th>Last Updated</th>
+  <td>
+    {new Date(
+      kycResult.lastUpdateTimestamp * 1000
+    ).toLocaleString()}
+  </td>
+</tr>
 </tbody>
             </table>
           </div>
@@ -100,12 +122,21 @@ const CompanyKycResult = () => {
           <div className="card-body">
             {kycResult.entities?.length > 0 ? (
               <table className="table table-bordered">
-                <thead>
+               <thead>
   <tr>
     <th>ID</th>
-    <th>Name</th>
+    <th>Company Name</th>
     <th>Entity Type</th>
-    <th>Score</th>
+    <th>Gender</th>
+    <th>Nationalities</th>
+    <th>Codes</th>
+    <th>Birth Dates</th>
+    <th>Death Dates</th>
+    <th>Last Update</th>
+    <th>Locations</th>
+<th>Organization Details</th>
+<th>Recaps</th>
+<th>Legal Enforcement Update</th>
   </tr>
 </thead>
 
@@ -113,9 +144,61 @@ const CompanyKycResult = () => {
   {kycResult.entities.map((entity) => (
     <tr key={entity.id}>
       <td>{entity.id}</td>
-      <td>{entity.name}</td>
-      <td>{entity.entityType}</td>
-      <td>{entity.score}</td>
+
+      <td>{entity.names?.[0]?.full_name || "-"}</td>
+
+      <td>{entity.entity_type || "-"}</td>
+
+      <td>{entity.gender || "-"}</td>
+
+      <td>
+        {entity.nationalities?.length
+          ? entity.nationalities.join(", ")
+          : "-"}
+      </td>
+
+      <td>
+        {entity.codes?.length
+          ? entity.codes.join(", ")
+          : "-"}
+      </td>
+
+      <td>
+        {entity.birth_dates?.length
+          ? entity.birth_dates.join(", ")
+          : "-"}
+      </td>
+
+      <td>
+        {entity.death_dates?.length
+          ? entity.death_dates.join(", ")
+          : "-"}
+      </td>
+
+      <td>
+        {entity.last_update?.entity || "-"}
+      </td>
+      <td>
+  {entity.locations?.length
+    ? JSON.stringify(entity.locations)
+    : "-"}
+</td>
+
+<td>
+  {entity.organization_details?.length
+    ? JSON.stringify(entity.organization_details)
+    : "-"}
+</td>
+
+<td>
+  {entity.recaps?.length
+    ? JSON.stringify(entity.recaps)
+    : "-"}
+</td>
+
+<td>
+  {entity.last_update?.legal_enforcement || "-"}
+</td>
     </tr>
   ))}
 </tbody>

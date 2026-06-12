@@ -106,6 +106,21 @@ const LandingPage = () => {
               borderLeft: "1px solid #e5e7eb",
             }}
           >
+            <div
+         onClick={() => navigate("/kyc-region-select")}
+            style={{
+              flex: 1,
+              background: "#fff",
+              color: "#374151",
+              padding: "28px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+              borderLeft: "1px solid #e5e7eb",
+            }}
+          ></div>
             <GppGoodIcon
               style={{
                 color: "#16a34a",

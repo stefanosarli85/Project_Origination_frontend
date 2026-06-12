@@ -20,7 +20,12 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CompanyKycResult from "./pages/CompanyKycResult";
 import CompanyNews from "./pages/CompanyNews";
+import KycRegionSelect from "./pages/KycRegionSelect";
 import KycRegionSelection from "./pages/KycRegionSelection";
+import ItalyCompanyKyc from "./pages/ItalyCompanyKyc";
+import ItalyPersonKyc from "./pages/ItalyPersonKyc";
+
+
 
 function App() {
   const router = createBrowserRouter([
@@ -60,10 +65,23 @@ function App() {
   path: "/kyc-region",
   element: <KycRegionSelection />,
 },
+{
+  path: "/kyc-region-select",
+  element: <KycRegionSelect />,
+},
+
     {
       path: "/selected-companies",
       element: <SelectedCompanies />,
     },
+    {
+  path: "/italy-person-kyc",
+  element: <ItalyPersonKyc />,
+},
+{
+  path: "/italy-company-kyc",
+  element: <ItalyCompanyKyc />,
+},
     {
       path: "/login",
       element: <Login />,
