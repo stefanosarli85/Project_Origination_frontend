@@ -10,7 +10,7 @@ const CompanyKyc = () => {
 
     try {
       const response = await fetch(
-        "http://43.205.207.160:1701/api/kyc-check",
+        "http://43.205.207.160:1701/api/global/kyc-check",
         {
           method: "POST",
           headers: {
