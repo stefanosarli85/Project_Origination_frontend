@@ -761,55 +761,35 @@ manualSorting: true,
 const handleDownload = async () => {
   try {
     setIsDownloading(true);
- 
+
     const selectedRow =
       table.getSelectedRowModel().rows[0];
- 
+
     if (!selectedRow) {
       alert("Please select a company");
       return;
     }
- 
-   const companyCode =
-  selectedRow.original.codice_fiscale;
 
-// CHECK STATUS FIRST
-console.log(
-  "isReportAvailable:",
-  isReportAvailable
-);
+    const companyCode =
+      selectedRow.original.codice_fiscale;
 
-if (isReportAvailable === false) {
-  alert("Generating New Report");
+    const response = await fetch(
+      `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
+      {
+        method: "POST",
+      }
+    );
 
-  const response = await fetch(
-    `${BASE_URL}/api/fetch-financial-document/${companyCode}`,
-    {
-      method: "POST",
-    }
-  );
-
-  const data = await response.json();
-
-  const fileUrl = data?.s3_url;
-
-  if (!fileUrl) {
-    throw new Error("No file URL found");
-  }
-
-  window.open(fileUrl, "_blank");
-} else {
-  alert("Data Available");
-}
- 
     const data = await response.json();
- 
+
+    console.log("DOWNLOAD RESPONSE", data);
+
     const fileUrl = data?.s3_url;
- 
+
     if (!fileUrl) {
       throw new Error("No file URL found");
     }
- 
+
     window.open(fileUrl, "_blank");
   } catch (error) {
     console.error(error);
@@ -818,7 +798,6 @@ if (isReportAvailable === false) {
     setIsDownloading(false);
   }
 };
-
 const handleFetchNews = async () => {
   try {
     setIsFetchingNews(true);
