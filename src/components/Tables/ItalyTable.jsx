@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import * as XLSX from "xlsx";
+
  
 import {
   MaterialReactTable,
@@ -609,6 +611,55 @@ const [isFetchingNews, setIsFetchingNews] =
 
   checkStatus();
 }, [rowSelection]);
+const handleExportCSV = () => {
+  const selectedRows =
+    table.getSelectedRowModel().rows;
+
+  if (selectedRows.length === 0) {
+    alert("Please select at least one company");
+    return;
+  }
+
+  const csvData = selectedRows.map((row) => ({
+    "Company Code": row.original.codice_fiscale,
+    "Company Name": row.original.denominazione,
+    City: row.original.comune,
+    "Industry Code": row.original.codice_ateco,
+    "Main Industry": row.original.main_industry,
+    Revenue: row.original.ricavi_operativi_2024,
+    EBIT: row.original.ebit_2024,
+    Employees: row.original.numero_dipendenti_2024,
+  }));
+
+  const headers = Object.keys(csvData[0]);
+
+  const csvRows = [
+    headers.join(","),
+    ...csvData.map((row) =>
+      headers
+        .map((field) => `"${row[field] ?? ""}"`)
+        .join(",")
+    ),
+  ];
+
+  const csvString = csvRows.join("\n");
+
+  const blob = new Blob([csvString], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "Companies.csv";
+  link.click();
+
+  URL.revokeObjectURL(url);
+};
+
+
+
   const table = useMaterialReactTable({
   columns,
   data,
@@ -674,6 +725,7 @@ manualSorting: true,
       >
         <InfoOutlinedIcon fontSize="small" />
       </IconButton>
+      
     ),
    renderTopToolbarCustomActions: () => (
   <div
@@ -705,6 +757,22 @@ manualSorting: true,
     >
       Fetch Financial Reports
     </button>
+    {table.getSelectedRowModel().rows.length > 0 && (
+  <button
+  onClick={handleExportCSV}
+    style={{
+      padding: "10px 16px",
+      background: "#16a34a",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    Export Excel
+  </button>
+)}
  
    {table.getSelectedRowModel().rows.length > 0 &&
  isReportAvailable !== null && (
@@ -1292,6 +1360,39 @@ incomeData.cashFlow = {
 
   
 }
+const handleExportDialogExcel = () => {
+  const workbook = XLSX.utils.book_new();
+
+  // Company Details
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet([selectedRowData]),
+    "Company Details"
+  );
+
+  // Management Team
+  if (people.length > 0) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(people),
+      "Management Team"
+    );
+  }
+
+  // Shareholders
+  if (shareholders.length > 0) {
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(shareholders),
+      "Shareholders"
+    );
+  }
+
+  XLSX.writeFile(
+    workbook,
+    `${selectedRowData?.denominazione || "Company"}.xlsx`
+  );
+};
   return (
     <>
    <button
@@ -1336,19 +1437,70 @@ incomeData.cashFlow = {
             }}
           >
             <IconButton
-              size="small"
-              onClick={() => setModalOpen(false)}
-              sx={{
-                position: "absolute",
-                top: 12,
-                right: 12,
-                color: "rgba(255,255,255,0.8)",
-                "&:hover": { color: "#fff", background: "rgba(255,255,255,0.15)" },
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
- 
+  size="small"
+  onClick={() => setModalOpen(false)}
+  sx={{
+    position: "absolute",
+    top: 12,
+    right: 12,
+    color: "rgba(255,255,255,0.8)",
+  }}
+>
+  <CloseIcon />
+</IconButton>
+
+<button
+  onClick={() => {
+    if (!selectedRowData) return;
+
+    const data = [selectedRowData];
+
+    const headers = Object.keys(data[0]);
+
+    const csvRows = [
+      headers.join(","),
+      ...data.map((row) =>
+        headers
+          .map((field) => `"${row[field] ?? ""}"`)
+          .join(",")
+      ),
+    ];
+
+    const csvString = csvRows.join("\n");
+
+    const blob = new Blob([csvString], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = `${selectedRowData.denominazione}.csv`;
+
+    link.click();
+
+    window.URL.revokeObjectURL(url);
+  }}
+  style={{
+    position: "absolute",
+    top: "12px",
+    right: "60px",
+    padding: "10px 16px",
+    backgroundColor: "#22c55e",
+    color: "#fff",
+    border: "none",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+    fontSize: "14px",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+    zIndex: 10,
+  }}
+>
+  📊 Export CSV
+</button>
             <Typography
               variant="h5"
               fontWeight={700}

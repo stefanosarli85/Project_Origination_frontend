@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { useLocation, useNavigate } from "react-router";
+import * as XLSX from "xlsx";
+
 
 const ItalyReportsPage = () => {
   const location = useLocation();
@@ -16,8 +18,7 @@ console.log("Selected Schedules:", schedules);
   const [reportData, setReportData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
-  const [isDownloading, setIsDownloading] =
-  useState(false);
+  
 
   const BASE_URL = "http://43.205.207.160:1701";
 
@@ -91,6 +92,393 @@ console.log("DOWNLOAD API:", data);
   } finally {
     setIsDownloading(false);
   }
+};
+const handleExportExcel = () => {
+  console.log("REPORT DATA", reportData);
+  console.log("SEARCH DATA", reportData?.searchData);
+  console.log("COMPANY", reportData?.data?.company);
+  const workbook = XLSX.utils.book_new();
+const companyName =
+  scheduleReportData?.searchData?.denominazione || "";
+
+const companyCode =
+  scheduleReportData?.searchData?.codice_fiscale || "";
+  
+
+  // 05 Company Overview
+  if (schedules.includes("05")) {
+    const data = schedule05Years.map((year) => ({
+       "Company Name": companyName,
+  "Company Code": companyCode,
+      Year: year,
+      Revenue: schedule05[year]?.fatturato,
+      Profit: schedule05[year]?.utile,
+      EmployeeCost: schedule05[year]?.costo_personale,
+      Employees: schedule05[year]?.numero_dipendenti,
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Company Overview"
+    );
+  }
+
+  // 10 Income Statement
+  if (schedules.includes("10")) {
+    
+    const data = [
+      {
+         "Company Name": companyName,
+    "Company Code": companyCode,
+        Metric: "Operating Revenue",
+        ...incomeData.operatingRevenue,
+      },
+      {
+        Metric: "Other Revenue",
+        ...incomeData.otherRevenue,
+      },
+      {
+        Metric: "Total Production Value",
+        ...incomeData.totalProductionValue,
+      },
+      {
+        Metric: "Total Production Cost",
+        ...incomeData.totalProductionCost,
+      },
+      {
+        Metric: "Purchase Cost",
+        ...incomeData.purchaseCost,
+      },
+      {
+        Metric: "Service Cost",
+        ...incomeData.serviceCost,
+      },
+      {
+        Metric: "Employee Cost",
+        ...incomeData.employeeCost,
+      },
+      {
+        Metric: "EBITDA",
+        ...incomeData.ebitda,
+      },
+      {
+        Metric: "EBIT",
+        ...incomeData.ebit,
+      },
+      {
+        Metric: "Net Profit",
+        ...incomeData.netProfit,
+      },
+      {
+        Metric: "Cash Flow",
+        ...incomeData.cashFlow,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Income Statement"
+    );
+  }
+
+  // 20 Assets
+  if (schedules.includes("20")) {
+    const data = [
+
+      {  "Company Name": companyName,
+    "Company Code": companyCode,
+        Metric: "Intangible Assets",
+        ...assetsTableData.intangibleAssets,
+      },
+      {
+        Metric: "Tangible Assets",
+        ...assetsTableData.tangibleAssets,
+      },
+      {
+        Metric: "Total Fixed Assets",
+        ...assetsTableData.totalFixedAssets,
+      },
+      {
+        Metric: "Receivables",
+        ...assetsTableData.totalReceivables,
+      },
+      {
+        Metric: "Cash",
+        ...assetsTableData.cashEquivalents,
+      },
+      {
+        Metric: "Current Assets",
+        ...assetsTableData.currentAssets,
+      },
+      {
+        Metric: "Total Assets",
+        ...assetsTableData.totalAssets,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Assets"
+    );
+  }
+
+  // 30 Liabilities
+  if (schedules.includes("30")) {
+    const data = [
+      {
+         "Company Name": companyName,
+    "Company Code": companyCode,
+        Metric: "Net Worth",
+        ...liabilitiesTableData.netWorth,
+      },
+      {
+        Metric: "Share Capital",
+        ...liabilitiesTableData.shareCapital,
+      },
+      {
+        Metric: "Reserves",
+        ...liabilitiesTableData.reserves,
+      },
+      {
+        Metric: "Retained Earnings",
+        ...liabilitiesTableData.retainedEarnings,
+      },
+      {
+        Metric: "Total Payables",
+        ...liabilitiesTableData.totalPayables,
+      },
+      {
+        Metric: "Total Liabilities",
+        ...liabilitiesTableData.totalLiabilities,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Liabilities"
+    );
+  }
+
+  // 40 Financial Ratios
+  if (schedules.includes("40")) {
+    const data = ratioYears.map((year) => ({
+       "Company Name": companyName,
+    "Company Code": companyCode,
+      Year: year,
+      ROE: ratioData.roe?.[year],
+      ROI: ratioData.roi?.[year],
+      ROS: ratioData.ros?.[year],
+      CurrentRatio: ratioData.currentRatio?.[year],
+      QuickRatio: ratioData.quickRatio?.[year],
+      NetFinancialPosition:
+        ratioData.netFinancialPosition?.[year],
+      RevenueGrowth:
+        ratioData.revenueGrowth?.[year],
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Financial Ratios"
+    );
+  }
+
+  // 50 Profitability
+  if (schedules.includes("50")) {
+    const data = profitabilityYears.map((year) => ({
+       "Company Name": companyName,
+    "Company Code": companyCode,
+      Year: year,
+      Profit: profitabilityData.profit?.[year],
+      EmployeeCost:
+        profitabilityData.employeeCost?.[year],
+      Employees:
+        profitabilityData.employees?.[year],
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Profitability"
+    );
+  }
+
+  // 60 Productivity
+  if (schedules.includes("60")) {
+    const data = productivityYears.map((year) => ({
+       "Company Name": companyName,
+    "Company Code": companyCode,
+      Year: year,
+      Revenue: productivityData.revenue?.[year],
+      EmployeeCost:
+        productivityData.employeeCost?.[year],
+      Employees:
+        productivityData.employees?.[year],
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Productivity"
+    );
+  }
+
+  // 70 Growth
+  if (schedules.includes("70")) {
+    const data = growthYears.map((year) => ({
+       "Company Name": companyName,
+    "Company Code": companyCode,
+      Year: year,
+      Profit: growthData.profit?.[year],
+      Revenue: growthData.revenue?.[year],
+      EmployeeCost:
+        growthData.employeeCost?.[year],
+      Employees:
+        growthData.employees?.[year],
+    }));
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Growth"
+    );
+  }
+
+  // 85 Contacts
+ // 85 Contacts
+if (schedules.includes("85")) {
+  
+  const contactsData = [
+    {
+       "Company Name": companyName,
+    "Company Code": companyCode,
+      Phone: contacts?.telefoni?.join(", "),
+      Email: contacts?.email?.join(", "),
+      PEC: contacts?.pec?.join(", "),
+      Website: contacts?.siti_web?.join(", "),
+    },
+  ];
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(contactsData),
+    "Contacts"
+  );
+
+  const managementData = managementTeam.map(
+    (person) => ({
+      Name: person.denominazione,
+      Role: person.carica,
+      TaxCode: person.cf,
+    })
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(managementData),
+    "Management Team"
+  );
+
+  const shareholdersData = shareholders.map(
+    (shareholder) => ({
+      Shareholder:
+        shareholder.denominazione,
+      OwnershipPercentage:
+        shareholder.quota_perc_cons,
+      NominalValue:
+        shareholder.valore_nominale,
+      PaidValue:
+        shareholder.valore_versato,
+    })
+  );
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      shareholdersData
+    ),
+    "Shareholders"
+  );
+}
+  // ANA Registry
+  if (schedules.includes("ANA")) {
+    const data = [
+      {
+        CompanyName:
+          scheduleANA.ragione_sociale,
+        TaxCode:
+          scheduleANA.codice_fiscale,
+        VAT:
+          scheduleANA.partita_iva,
+        LegalForm:
+          scheduleANA.forma_giuridica
+            ?.descrizione,
+        Ateco:
+          scheduleANA.ateco?.descrizione,
+        Address:
+          scheduleANA.sede_legale,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Registry"
+    );
+  }
+
+  // PROT
+  if (schedules.includes("PROT")) {
+    const data = [
+      { "Company Name":companyName,
+    "Company Code": companyCode,
+        Protests:
+          schedulePROT.protesti,
+        NegativeRecords:
+          schedulePROT.pregiudizievoli,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Negative Records"
+    );
+  }
+
+  // CR
+  if (schedules.includes("CR")) {
+    const data = [
+      {
+         "Company Name": companyName,
+    "Company Code": companyCode,
+        CreditScore:
+          scheduleCR?.credit_score,
+        Rating:
+          scheduleCR?.rating,
+        CreditLine:
+          scheduleCR?.linea_credito_affidamento,
+      },
+    ];
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.json_to_sheet(data),
+      "Credit Rating"
+    );
+  }
+console.log("COMPANY NAME:", companyName);
+console.log("COMPANY CODE:", companyCode);
+console.log("REPORT DATA:", reportData);
+
+XLSX.writeFile(
+  workbook,
+  `${companyName || "Italy_Report"}.xlsx`
+);
 };
 
   useEffect(() => {
@@ -610,49 +998,27 @@ console.log("YEARS", schedule05Years);
     {company?.denominazione || "Company"} - {company?.company_name || "Italy Financial Report Dashboard"}
   </h1>
 
-  <button
-    onClick={handleDownload}
-    disabled={isDownloading}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      padding: "12px 18px",
-      background: isDownloading
-        ? "#94a3b8" 
-        : "linear-gradient(135deg, #2563eb, #1d4ed8)",
-      color: "#fff",
-      border: "none",
-      borderRadius: "10px",
-      fontSize: "14px",
-      fontWeight: "600",
-      cursor: isDownloading
-        ? "not-allowed"
-        : "pointer",
-      boxShadow:
-        "0 4px 12px rgba(37,99,235,0.25)",
-    }}
-  >
-    {isDownloading ? (
-      <>
-        <span
-          style={{
-            width: "16px",
-            height: "16px",
-            border: "2px solid #fff",
-            borderTop:
-              "2px solid transparent",
-            borderRadius: "50%",
-            animation:
-              "spin 0.8s linear infinite",
-          }}
-        />
-        Downloading...
-      </>
-    ) : (
-      <>⬇ Download Report</>
-    )}
-  </button>
+ <button
+  onClick={handleExportExcel}
+  style={{
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    padding: "12px 18px",
+    background:
+      "linear-gradient(135deg, #16a34a, #15803d)",
+    color: "#fff",
+    border: "none",
+    borderRadius: "10px",
+    fontSize: "14px",
+    fontWeight: "600",
+    cursor: "pointer",
+    boxShadow:
+      "0 4px 12px rgba(22,163,74,0.25)",
+  }}
+>
+  📊 Export Excel
+</button>
 </div>
 
 

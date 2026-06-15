@@ -53,7 +53,11 @@ const LandingPage = () => {
         >
           {/* Search Companies */}
           <div
-            onClick={() => navigate("/search-companies")}
+            onClick={() => {
+  sessionStorage.removeItem("currentStep");
+  sessionStorage.removeItem("currentRegion");
+  navigate("/search-companies");
+}}
             style={{
               flex: 1,
               background:
