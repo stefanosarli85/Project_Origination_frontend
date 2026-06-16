@@ -1488,7 +1488,8 @@ if (assetsData?.length) {
   XLSX.utils.book_append_sheet(
     workbook,
     XLSX.utils.json_to_sheet(
-      assetsData.map((item) => ({
+      assetsData.map(([year, item]) => ({
+        Year: year,
         ...item,
       }))
     ),
