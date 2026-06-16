@@ -31,7 +31,7 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 // ─── Field group definitions ────────────────────────────────────────────────
 const FIELD_GROUPS = [
   {
-    label: "Company Info",
+    label: "",
     icon: <BusinessIcon fontSize="small" />,
     accent: "#1565c0",
     bg: "#e3f2fd",
@@ -50,7 +50,7 @@ const FIELD_GROUPS = [
       "regione", "nazione", "latitudine", "longitudine",
     ],
   },
-  {
+  {                                                                                                                                                                                                                                                                                                                                                                
   label: "Industry",
   icon: <FactoryIcon fontSize="small" />,
   accent: "#e65100",
@@ -208,7 +208,7 @@ const SectionCard = ({ group, data }) => {
 };
  
 // ─── Main component ──────────────────────────────────────────────────────────
-                                                                  const ItalyTable = () => {
+ const ItalyTable = () => {
   const navigate = useNavigate();
  
   const [data, setData] = useState([]);
@@ -227,6 +227,8 @@ const [selectedSchedules, setSelectedSchedules] =
   useState([]);
   const [scheduleStatus, setScheduleStatus] =
   useState({});
+  const [availableSchedules, setAvailableSchedules] =
+  useState([]);
   const SCHEDULES = [
   { code: "05", label: "Company Overview" },
   { code: "10", label: "Financial Statement (Income Statement)" },
@@ -242,7 +244,7 @@ const [selectedSchedules, setSelectedSchedules] =
   },
   {
     code: "ANA",
-    label: "Company Registry Information",
+    label: "ANA Company Registry Information",
   },
   {
     code: "PROT",
@@ -448,45 +450,74 @@ setIsError(false);
  
   // const handleRowSelection = (rowId) => setRowSelection({ [rowId]: true });
  
-  const handleInfoClick = async (row) => {
+const handleInfoClick = async (row) => {
   try {
     const companyCode =
       row.original.codice_fiscale;
-     
- 
-    const response = await fetch(
-      `http://43.205.207.160:1701/api/italy/company/${companyCode}`
+
+    // Get schedule status
+    const statusResponse = await fetch(
+      `http://43.205.207.160:1701/api/get-schedule-status/${companyCode}`
     );
- 
-    const data = await response.json();
+
+    const statusData =
+      await statusResponse.json();
+
+    const schedules = Object.keys(
+      statusData[companyCode] || {}
+    )
+      .filter(
+        (key) =>
+          statusData[companyCode][key] === true
+      )
+      .map((key) =>
+        key.startsWith("S")
+          ? key.replace("S", "")
+          : key
+      );
+
     console.log(
-  "BALANCE SHEET",
-  data?.data?.related_data?.italy_company_balance_sheet
+      "TRUE SCHEDULES",
+      schedules
+    );
+
+    setAvailableSchedules(schedules);
+
+    const params = new URLSearchParams();
+
+    schedules.forEach((schedule) => {
+      params.append("schedules", schedule);
+    });
+
+    const response = await fetch(
+      `http://43.205.207.160:1701/api/italy/company/${companyCode}?${params.toString()}`,
+      {
+        method: "POST",
+      }
+    );
+
+    const data = await response.json();
+console.log(
+  "ACTION RESPONSE FULL",
+  JSON.stringify(data, null, 2)
+);
+    console.log("RELATED DATA", data?.data?.related_data);
+console.log("RELATED DATA KEYS",
+  Object.keys(data?.data?.related_data || {})
 );
 
-console.log(
-  "ASSETS",
-  data?.data?.related_data?.italy_company_assets
-);
-
-console.log(
-  "LIABILITIES",
-  data?.data?.related_data?.italy_company_liabilities
-);
-    console.log("ACTION RESPONSE", data);
- 
     setSelectedRowData(row.original);
 
-if (data?.success === true) {
-  setReportData(data);
-} else {
-  setReportData({
-    success: false,
-    searchData: row.original,
-  });
-}
+    if (data?.success === true) {
+      setReportData(data);
+    } else {
+      setReportData({
+        success: false,
+        searchData: row.original,
+      });
+    }
 
-setModalOpen(true);
+    setModalOpen(true);
   } catch (error) {
     console.error(error);
   }
@@ -509,8 +540,30 @@ const handleFetchReports = async () => {
 
     console.log("SCHEDULE STATUS", data);
 
-    setScheduleStatus(
-      data[companyCode] || {}
+    const statusData =
+      data[companyCode] || {};
+
+    setScheduleStatus(statusData);
+
+    const trueSchedules = Object.keys(
+      statusData
+    )
+      .filter(
+        (key) => statusData[key] === true
+      )
+      .map((key) =>
+        key.startsWith("S")
+          ? key.replace("S", "")
+          : key
+      );
+
+    console.log(
+      "AVAILABLE SCHEDULES",
+      trueSchedules
+    );
+
+    setAvailableSchedules(
+      trueSchedules
     );
 
     setScheduleDialogOpen(true);
@@ -537,10 +590,9 @@ const handleGenerateReport = async () => {
       selectedRow.original.codice_fiscale;
      
     const params = new URLSearchParams();
- 
-    selectedSchedules.forEach((schedule) => {
-      params.append("schedules", schedule);
-    });
+selectedSchedules.forEach((schedule) => {
+  params.append("schedules", schedule);
+});
     const searchData = selectedRow.original;
  
  
@@ -946,7 +998,44 @@ navigate("/company-news", {
   const people =
   reportData?.data?.related_data?.italy_company_people || [];
   const assetsData =
-  reportData?.data?.related_data?.italy_company_assets || [];
+  Object.entries(reportData?.data?.["20"] || {});
+  const schedule05 =
+  reportData?.data?.["05"] || {};
+const schedule40 =
+  reportData?.data?.["40"] || {};
+  const schedule50 =
+  reportData?.data?.["50"] || {};
+  const schedule60 =
+  reportData?.data?.["60"] || {};
+  const schedule70 = reportData?.data?.["70"] || {};
+
+const schedule70Years = Object.keys(
+  schedule70
+).sort((a, b) => Number(b) - Number(a));
+
+const schedule60Years = Object.keys(
+  schedule60
+).sort((a, b) => Number(b) - Number(a));
+
+const schedule50Years = Object.keys(
+  schedule50
+).sort((a, b) => Number(b) - Number(a));
+
+const schedule40Years = Object.keys(
+  schedule40
+).sort((a, b) => Number(b) - Number(a));
+const schedule05Years = Object.keys(
+  schedule05
+).sort((a, b) => Number(b) - Number(a));
+  console.log(
+  "ASSETS RAW",
+  reportData?.data?.["20"]
+);
+
+console.log(
+  "ASSETS DATA",
+  assetsData
+);
  
  
   const assetsTableData = {
@@ -960,40 +1049,34 @@ navigate("/company-news", {
   accruedAssets: {},
   totalAssets: {},
 };
-assetsData.forEach((item) => {
-  console.log("ASSET ROW", item);
-console.log(
-  "DISPONIBILITA LIQUIDE",
-  item.disponibilita_liquide
-);
-  const year = item.financial_year;
- 
+assetsData.forEach(([year, item]) => {
+
   assetsTableData.intangibleAssets[year] =
-    item.immobilizzazioni_immateriali;
- 
-  assetsTableData.tangibleAssets[year] =
-    item.immobilizzazioni_materiali;
- 
-  assetsTableData.totalFixedAssets[year] =
-    item.totale_immobilizzazioni;
- 
-  assetsTableData.totalReceivables[year] =
-    item.totale_crediti;
- 
-  assetsTableData.receivables12Months[year] =
-    item.crediti_entro_12_mesi;
- 
-  assetsTableData.cashEquivalents[year] =
-    item.disponibilita_liquide;
- 
-  assetsTableData.currentAssets[year] =
-    item.attivo_circolante;
- 
-  assetsTableData.accruedAssets[year] =
-    item.ratei_risconti_attivi;
- 
-  assetsTableData.totalAssets[year] =
-    item.totale_attivo;
+  item.IMMOBILIZZAZIONI_IMMATERIALI;
+
+assetsTableData.tangibleAssets[year] =
+  item.IMMOBILIZZAZIONI_MATERIALI;
+
+assetsTableData.totalFixedAssets[year] =
+  item.TOTALE_IMMOBILIZZAZIONI;
+
+assetsTableData.totalReceivables[year] =
+  item.TOTALE_CREDITI;
+
+assetsTableData.receivables12Months[year] =
+  item.CREDITI_ENTRO_12_MESI;
+
+assetsTableData.cashEquivalents[year] =
+  item.TOTALE_DISPONIBILITA_LIQUIDE;
+
+assetsTableData.currentAssets[year] =
+  item.TOTALE_ATTIVO_CIRCOLANTE;
+
+assetsTableData.accruedAssets[year] =
+  item.RATEI_E_RISCONTI_ATTIVI;
+
+assetsTableData.totalAssets[year] =
+  item.TOTALE_ATTIVO;
 });
 const searchData = reportData?.searchData;
 console.log("SEARCH DATA KEYS", Object.keys(searchData || {}));
@@ -1038,9 +1121,8 @@ if (isSearchData) {
   searchData?.disponibilita_liquide_2024
 );
 }
-
 const liabilitiesData =
-  reportData?.data?.related_data?.italy_company_liabilities || [];
+  Object.entries(reportData?.data?.["30"] || {});
  
 const liabilitiesTableData = {
   netWorth: {},
@@ -1055,38 +1137,36 @@ const liabilitiesTableData = {
   accruedLiabilities: {},
   totalLiabilities: {},
 };
-liabilitiesData.forEach((item) => {
-  const year = item.financial_year;
- 
+liabilitiesData.forEach(([year, item]) => {
   liabilitiesTableData.netWorth[year] =
-    item.patrimonio_netto;
- 
-  liabilitiesTableData.shareCapital[year] =
-    item.capitale_sociale;
- 
-  liabilitiesTableData.reserves[year] =
-    item.riserve;
- 
-  liabilitiesTableData.retainedEarnings[year] =
-    item.utile_perdita_portato_a_nuovo;
- 
-  liabilitiesTableData.provisions[year] =
-    item.fondi_rischi_oneri;
- 
-  liabilitiesTableData.employeeSeveranceFund[year] =
-    item.trattamento_fine_rapporto;
- 
-  liabilitiesTableData.totalPayables[year] =
-    item.totale_debiti;
- 
-  liabilitiesTableData.payables12Months[year] =
-    item.debiti_entro_12_mesi;
- 
-  liabilitiesTableData.accruedLiabilities[year] =
-    item.ratei_risconti_passivi;
- 
-  liabilitiesTableData.totalLiabilities[year] =
-    item.totale_passivo;
+  item.patrimonio_netto;
+
+liabilitiesTableData.shareCapital[year] =
+  item.capitale_sociale;
+
+liabilitiesTableData.reserves[year] =
+  item.altre_riserve;
+
+liabilitiesTableData.retainedEarnings[year] =
+  item.utile_perdita_esercizio;
+
+liabilitiesTableData.employeeSeveranceFund[year] =
+  item.fondo_tfr;
+
+liabilitiesTableData.totalPayables[year] =
+  item.totale_debiti;
+
+liabilitiesTableData.payables12Months[year] =
+  item.debiti_entro_12_mesi;
+
+liabilitiesTableData.payablesBeyond12Months[year] =
+  item.debiti_oltre_12_mesi;
+
+liabilitiesTableData.accruedLiabilities[year] =
+  item.ratei_risconti_passivi;
+
+liabilitiesTableData.totalLiabilities[year] =
+  item.totale_passivo;
 });
 if (isSearchData) {
  liabilitiesTableData.netWorth = {
@@ -1167,22 +1247,17 @@ console.log(
   searchData?.total_liabilities_2022
 );
 }
-    const incomeStatement =
-  reportData?.data?.related_data?.italy_company_balance_sheet || [];
+const incomeStatement =
+  Object.entries(reportData?.data?.["10"] || {});
  
   console.log(
   "BALANCE SHEET",
   reportData?.data?.related_data?.italy_company_balance_sheet
 );
-
-const years =
-  incomeStatement.length > 0
-    ? [...new Set(
-        incomeStatement.map((item) =>
-          String(item.financial_year)
-        )
-      )].sort((a, b) => a - b)
-    : ["2022", "2023", "2024"];
+const years = Object.keys(
+  reportData?.data?.["10"] || {}
+);
+console.log("YEARS", years);
    
 const incomeData = {
   operatingRevenue: {},
@@ -1204,61 +1279,59 @@ const incomeData = {
   cashFlow: {},
 };
  
-incomeStatement.forEach((item) => {
-  const year = item.financial_year;
+incomeStatement.forEach(([year, item]) => {
 
   incomeData.operatingRevenue[year] =
-    item.ricavi_operativi;
+    item.RICAVI_OPERATIVI;
 
   incomeData.otherRevenue[year] =
-    item.ricavi_e_proventi;
+    item.RICAVI_E_PROVENTI;
 
   incomeData.totalProductionValue[year] =
-    item.totale_valore_produzione;
+    item.TOTALE_VALORE_DELLA_PRODUZIONE;
 
   incomeData.totalProductionCost[year] =
-    item.totale_costi_produzione;
+    item.TOTALE_COSTI_DELLA_PRODUZIONE;
 
   incomeData.purchaseCost[year] =
-    item.costo_per_acquisti;
+    item.COSTO_PER_ACQUISTI;
 
   incomeData.serviceCost[year] =
-    item.costo_per_servizi;
+    item.COSTO_PER_SERVIZI;
 
   incomeData.thirdPartyAssetCost[year] =
-    item.costo_per_godimento_beni_terzi;
+    item.COSTO_PER_GODIMENTO_DI_BENI_DI_TERZI;
 
   incomeData.employeeCost[year] =
-    item.costo_personale;
+    item.COSTO_DEL_PERSONALE;
 
   incomeData.otherOperatingExpenses[year] =
-    item.oneri_diversi_gestione;
+    item.ONERI_DIVERSI_DI_GESTIONE;
 
   incomeData.ebitda[year] =
-    item.ebitda;
+    item.MARGINE_OPERATIVO_LORDO_EBITDA;
 
   incomeData.depreciation[year] =
-    item.ammortamenti_svalutazioni;
+    item.AMMORTAMENTI_E_SVALUTAZIONI;
 
   incomeData.ebit[year] =
-    item.ebit;
+    item.RISULTATO_OPERATIVO_EBIT;
 
   incomeData.financialCharges[year] =
-    item.proventi_oneri_finanziari;
+    item.PROVENTI_E_ONERI_FINANZIARI;
 
   incomeData.profitBeforeTax[year] =
-    item.risultato_prima_imposte;
+    item.RISULTATO_PRIMA_DELLE_IMPOSTE;
 
   incomeData.tax[year] =
-    item.imposte_reddito;
+    item.IMPOSTE_SUL_REDDITO_ESERCIZIO;
 
   incomeData.netProfit[year] =
-    item.utile_perdita_esercizio;
+    item.UTILE_PERDITA_ESERCIZIO;
 
   incomeData.cashFlow[year] =
-    item.flusso_di_cassa;
+    item.FLUSSO_DI_CASSA;
 });
-
 if (isSearchData) {
   incomeData.operatingRevenue = {
     2022: searchData?.ricavi_operativi_2022,
@@ -1375,7 +1448,7 @@ const handleExportDialogExcel = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       XLSX.utils.json_to_sheet(people),
-      "Management Team"
+      "85 Contacts, Shareholders, Executives & CEO"
     );
   }
 
@@ -1384,10 +1457,158 @@ const handleExportDialogExcel = () => {
     XLSX.utils.book_append_sheet(
       workbook,
       XLSX.utils.json_to_sheet(shareholders),
-      "Shareholders"
+      "85 Contacts, Shareholders, Executives & CEO"
     );
   }
+if (Object.keys(schedule05).length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      Object.entries(schedule05).map(([year, value]) => ({
+        Year: year,
+        ...value,
+      }))
+    ),
+    "05 Company Overview"
+  );
+}
+if (incomeStatement?.length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      incomeStatement.map(([year, item]) => ({
+        Year: year,
+        ...item,
+      }))
+    ),
+    "10 Financial Statement"
+  );
+}
+if (assetsData?.length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      assetsData.map((item) => ({
+        ...item,
+      }))
+    ),
+    "20 Assets"
+  );
+}
+if (liabilitiesData?.length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      liabilitiesData.map(([year, item]) => ({
+        Year: year,
+        ...item,
+      }))
+    ),
+    "30 Liabilities"
+  );
+}if (people?.length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(people),
+    "85 Management"
+  );
+}
+if (shareholders?.length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(shareholders),
+    "85 Shareholders"
+  );
+}
+if (reportData?.data?.ANA) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet([
+      {
+        Phone: reportData.data.ANA.telefono,
+        Email: reportData.data.ANA.email,
+        PEC: reportData.data.ANA.pec,
+      },
+    ]),
+    "85 Contacts"
+  );
+}
+if (Object.keys(schedule40).length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      Object.entries(schedule40).map(([year, value]) => ({
+        Year: year,
+        ...value,
+      }))
+    ),
+    "40 Financial Ratios"
+  );
+}
 
+if (Object.keys(schedule50).length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      Object.entries(schedule50).map(([year, value]) => ({
+        Year: year,
+        ...value,
+      }))
+    ),
+    "50 Profitability"
+  );
+}
+
+if (Object.keys(schedule60).length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      Object.entries(schedule60).map(([year, value]) => ({
+        Year: year,
+        ...value,
+      }))
+    ),
+    "60 Productivity"
+  );
+}
+
+if (Object.keys(schedule70).length) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet(
+      Object.entries(schedule70).map(([year, value]) => ({
+        Year: year,
+        ...value,
+      }))
+    ),
+    "70 Growth"
+  );
+}
+
+if (reportData?.data?.ANA) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet([reportData.data.ANA]),
+    "ANA"
+  );
+}
+
+if (reportData?.data?.PROT) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet([reportData.data.PROT]),
+    "PROT"
+  );
+}
+
+
+if (reportData?.data?.CR) {
+  XLSX.utils.book_append_sheet(
+    workbook,
+    XLSX.utils.json_to_sheet([reportData.data.CR]),
+    "CR"
+  );
+}
   XLSX.writeFile(
     workbook,
     `${selectedRowData?.denominazione || "Company"}.xlsx`
@@ -1450,39 +1671,7 @@ const handleExportDialogExcel = () => {
 </IconButton>
 
 <button
-  onClick={() => {
-    if (!selectedRowData) return;
-
-    const data = [selectedRowData];
-
-    const headers = Object.keys(data[0]);
-
-    const csvRows = [
-      headers.join(","),
-      ...data.map((row) =>
-        headers
-          .map((field) => `"${row[field] ?? ""}"`)
-          .join(",")
-      ),
-    ];
-
-    const csvString = csvRows.join("\n");
-
-    const blob = new Blob([csvString], {
-      type: "text/csv;charset=utf-8;",
-    });
-
-    const url = window.URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-
-    link.href = url;
-    link.download = `${selectedRowData.denominazione}.csv`;
-
-    link.click();
-
-    window.URL.revokeObjectURL(url);
-  }}
+  onClick={handleExportDialogExcel}
   style={{
     position: "absolute",
     top: "12px",
@@ -1499,7 +1688,7 @@ const handleExportDialogExcel = () => {
     zIndex: 10,
   }}
 >
-  📊 Export CSV
+  📊 Export Excel
 </button>
             <Typography
               variant="h5"
@@ -1608,15 +1797,505 @@ const handleExportDialogExcel = () => {
             "&::-webkit-scrollbar-thumb": { background: "#bdbdbd", borderRadius: 3 },
           }}
         >
-          {selectedRowData &&
-            FIELD_GROUPS.map((group) => (
-              <SectionCard key={group.label} group={group} data={selectedRowData} />
+          {availableSchedules.includes("05") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      05 Company Overview
+    </h2>
+
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: "900px",
+          fontSize: "14px",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={thStyle}>Financial Item</th>
+
+            {schedule05Years.map((year) => (
+              <th key={year} style={thStyle}>
+                {year}
+              </th>
             ))}
- 
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td style={tdStyle}>Revenue</td>
+
+            {schedule05Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule05[year]?.fatturato || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Net Profit</td>
+
+            {schedule05Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule05[year]?.utile || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employee Cost</td>
+
+            {schedule05Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule05[year]?.costo_personale || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employees</td>
+
+            {schedule05Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule05[year]?.numero_dipendenti || "-"}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+
+{availableSchedules.includes("PROT") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+      }}
+    >
+      PROT Protests & Negative Records
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        <tr>
+          <td style={tdStyle}>Protests</td>
+          <td style={tdStyle}>
+            {reportData?.data?.PROT?.protesti || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Negative Records</td>
+          <td style={tdStyle}>
+            {reportData?.data?.PROT?.pregiudizievoli || "-"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{availableSchedules.includes("70") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      70 Growth Analysis
+    </h2>
+
+    <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <thead>
+        <tr>
+          <th style={thStyle}>Indicator</th>
+          {schedule70Years.map((year) => (
+            <th key={year} style={thStyle}>
+              {year}
+            </th>
+          ))}
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td style={tdStyle}>Revenue</td>
+          {schedule70Years.map((year) => (
+            <td key={year} style={tdStyle}>
+              {Number(
+                schedule70[year]?.fatturato || 0
+              ).toLocaleString("en-US")}
+            </td>
+          ))}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Net Profit</td>
+          {schedule70Years.map((year) => (
+            <td key={year} style={tdStyle}>
+              {Number(
+                schedule70[year]?.utile || 0
+              ).toLocaleString("en-US")}
+            </td>
+          ))}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Employee Cost</td>
+          {schedule70Years.map((year) => (
+            <td key={year} style={tdStyle}>
+              {Number(
+                schedule70[year]?.costo_personale || 0
+              ).toLocaleString("en-US")}
+            </td>
+          ))}
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Employees</td>
+          {schedule70Years.map((year) => (
+            <td key={year} style={tdStyle}>
+              {schedule70[year]?.dipendenti || "-"}
+            </td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{availableSchedules.includes("CR") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#fff",
+      }}
+    >
+      CR Credit Score & Rating
+    </h2>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <tbody>
+        <tr>
+          <td style={tdStyle}>Rating</td>
+          <td style={tdStyle}>
+            {reportData?.data?.CR?.rating || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Credit Score</td>
+          <td style={tdStyle}>
+            {reportData?.data?.CR?.credit_score || "-"}
+          </td>
+        </tr>
+
+        <tr>
+          <td style={tdStyle}>Credit Line</td>
+          <td style={tdStyle}>
+            {Number(
+              reportData?.data?.CR?.linea_credito_affidamento || 0
+            ).toLocaleString("en-US")}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </>
+)}
+{availableSchedules.includes("40") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      40 Financial Ratios & Indicators
+    </h2>
+
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: "900px",
+          fontSize: "14px",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={thStyle}>Indicator</th>
+
+            {schedule40Years.map((year) => (
+              <th key={year} style={thStyle}>
+                {year}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td style={tdStyle}>ROE (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_roe ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>ROI (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_roi ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>ROS (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_ros ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Current Ratio</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.indice_disponibilita ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Quick Ratio</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.indice_liquidita_immediata ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Net Financial Position</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule40[year]?.pfn || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Revenue Growth (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_variazione_ricavi ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Production Growth (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_variazione_valore_produzione ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Net Worth Growth (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_variazione_patrimonio_netto ?? "-"}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Assets Growth (%)</td>
+
+            {schedule40Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule40[year]?.perc_variazione_attivo ?? "-"}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+{availableSchedules.includes("50") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      50 Profitability Analysis
+    </h2>
+
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: "900px",
+          fontSize: "14px",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={thStyle}>Indicator</th>
+
+            {schedule50Years.map((year) => (
+              <th key={year} style={thStyle}>
+                {year}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td style={tdStyle}>Net Profit</td>
+
+            {schedule50Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule50[year]?.utile || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employee Cost</td>
+
+            {schedule50Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule50[year]?.costo_personale || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employees</td>
+
+            {schedule50Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule50[year]?.dipendenti ?? "-"}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+         
+{availableSchedules.includes("ANA") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      ANA Company Registry Information
+    </h2>
+
+    {selectedRowData &&
+      FIELD_GROUPS.map((group) => (
+        <SectionCard
+          key={group.label}
+          group={group}
+          data={selectedRowData}
+        />
+      ))}
+  </>
+)}
           {/* Overflow / ungrouped fields */}
          
- 
-          {people.length > 0 && (
+ {availableSchedules.includes("85") &&
+  people.length > 0 && (
   <Box
   sx={{
     border: "1px solid #e0e0e0",
@@ -1661,7 +2340,7 @@ const handleExportDialogExcel = () => {
         </tr>
       </thead>
  
-      <tbody>-
+      <tbody>
         {people.map((person, index) => (
           <tr key={index}>
             <td style={tdStyle}>
@@ -1681,8 +2360,84 @@ const handleExportDialogExcel = () => {
     </table>
   </Box>
 )}
- 
-{shareholders.length > 0 && (
+{availableSchedules.includes("60") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+      60 Productivity Analysis
+    </h2>
+
+    <div style={{ overflowX: "auto" }}>
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          minWidth: "900px",
+          fontSize: "14px",
+        }}
+      >
+        <thead>
+          <tr>
+            <th style={thStyle}>Indicator</th>
+
+            {schedule60Years.map((year) => (
+              <th key={year} style={thStyle}>
+                {year}
+              </th>
+            ))}
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr>
+            <td style={tdStyle}>Revenue</td>
+
+            {schedule60Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule60[year]?.fatturato || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employee Cost</td>
+
+            {schedule60Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {Number(
+                  schedule60[year]?.costo_personale || 0
+                ).toLocaleString("en-US")}
+              </td>
+            ))}
+          </tr>
+
+          <tr>
+            <td style={tdStyle}>Employees</td>
+
+            {schedule60Years.map((year) => (
+              <td key={year} style={tdStyle}>
+                {schedule60[year]?.dipendenti ?? "-"}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+{availableSchedules.includes("85") &&
+  shareholders.length > 0 && (
   <Box
   sx={{
     mt: 3,
@@ -1745,6 +2500,8 @@ const handleExportDialogExcel = () => {
     </table>
   </Box>
 )}
+{availableSchedules.includes("10") && (
+  <>
           <h2
         style={{
           padding: "18px 22px",
@@ -1758,7 +2515,7 @@ const handleExportDialogExcel = () => {
           marginTop: "20px",
         }}
       >
-        Income Statement (Conto Economico) - EUR (€)
+        10 Financial Statement (Income Statement)
       </h2>
  
       <div style={{ overflowX: "auto" }}>
@@ -1897,19 +2654,24 @@ const handleExportDialogExcel = () => {
           </tbody>
 </table>
 </div>
-<h2
-    style={{
-      padding: "18px 22px",
-      margin: 0,
-      background:
-        "linear-gradient(90deg, #1e3a8a, #2563eb)",
-      color: "#ffffff",
-      fontSize: "20px",
-      fontWeight: "700",
-    }}
-  >
-    Balance Sheet Assets • EUR (€)
-  </h2>
+ </>
+)}
+{availableSchedules.includes("20") && (
+  <>
+    <h2
+      style={{
+        padding: "18px 22px",
+        margin: 0,
+        background:
+          "linear-gradient(90deg, #1e3a8a, #2563eb)",
+        color: "#ffffff",
+        fontSize: "20px",
+        fontWeight: "700",
+      }}
+    >
+20 Assets Balance Sheet
+    </h2>
+  
  
   <div style={{ overflowX: "auto" }}>
     <table
@@ -2009,7 +2771,73 @@ const handleExportDialogExcel = () => {
       </tbody>
     </table>
   </div>
+   </>
+  
+)}
+{availableSchedules.includes("85") && (
+  <Box
+    sx={{
+      border: "1px solid #e0e0e0",
+      borderLeft: "4px solid #1565c0",
+      borderRadius: "8px",
+      overflow: "hidden",
+      mb: 2,
+      mt: 2,
+    }}
+  >
+    <Box
+      sx={{
+        px: 2,
+        py: 1,
+        background: "#1976d2",
+      }}
+    >
+      <Typography
+        sx={{
+          color: "#fff",
+          fontWeight: 700,
+        }}
+      >
+        Contacts
+      </Typography>
+    </Box>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Phone</th>
+          <th style={thStyle}>Email</th>
+          <th style={thStyle}>PEC</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td style={tdStyle}>
+            {reportData?.data?.ANA?.telefono || "-"}
+          </td>
+
+          <td style={tdStyle}>
+            {reportData?.data?.ANA?.email || "-"}
+          </td>
+
+          <td style={tdStyle}>
+            {reportData?.data?.ANA?.pec || "-"}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </Box>
+)}
+{availableSchedules.includes("30") && (
+  <>
   <h2
+ 
     style={{
       padding: "18px 22px",
       margin: 0,
@@ -2020,7 +2848,7 @@ const handleExportDialogExcel = () => {
       fontWeight: "700",
     }}
   >
-    Balance Sheet Liabilities • EUR (€)
+     30 Liabilities Balance Sheet
   </h2>
  
   <div style={{ overflowX: "auto" }}>
@@ -2141,6 +2969,9 @@ const handleExportDialogExcel = () => {
     </table>
    
   </div>
+  </>
+)}
+
    <Box
   sx={{
     border: "1px solid #e0e0e0",
