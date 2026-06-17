@@ -13,10 +13,10 @@ import {
   Chip,
   Dialog,
   DialogContent,
-  Divider,
-  Grid,
-  IconButton,
-  Typography,
+  Divider, 
+  Grid, 
+  IconButton, 
+  Typography, 
 } from "@mui/material";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import BusinessIcon from "@mui/icons-material/Business";
@@ -144,9 +144,9 @@ const SectionCard = ({ group, data }) => {
       }}
     >
       {/* Section header */}
-      <Box
-        sx={{
-          display: "flex",
+     <Box
+  sx={{
+    display: group.label ? "flex" : "none",
           alignItems: "center",
           gap: 1,
           px: 2,
@@ -2973,11 +2973,10 @@ if (reportData?.data?.CR) {
   </>
 )}
 
-   <Box
+ <Box
   sx={{
-    border: "1px solid #e0e0e0",
-    borderLeft: "4px solid #1565c0",
-    borderRadius: "8px",
+    border: "1px solid #dbeafe",
+    borderRadius: "0 0 8px 8px",
     overflow: "hidden",
     mb: 2,
   }}
