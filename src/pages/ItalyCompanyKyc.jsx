@@ -16,7 +16,7 @@ const ItalyCompanyKyc = () => {
   const fetchRequests = async () => {
     try {
       const response = await fetch(
-        "http://43.205.207.160:1701/api/italy/comp/retrieve-kyc-requests"
+        "https://backend.formula-cf-ai.com/api/italy/comp/retrieve-kyc-requests"
       );
 
       const data = await response.json();
@@ -35,7 +35,7 @@ const ItalyCompanyKyc = () => {
 
     try {
       const response = await fetch(
-        "http://43.205.207.160:1701/api/italy/comp/request-kyc",
+        "https://backend.formula-cf-ai.com/api/italy/comp/request-kyc",
         {
           method: "POST",
           headers: {
@@ -72,7 +72,7 @@ const ItalyCompanyKyc = () => {
 
   try {
     const response = await fetch(
-      `http://43.205.207.160:1701/api/italy/comp/download-kyc-pdf/${requestId}`
+      `https://backend.formula-cf-ai.com/api/italy/comp/download-kyc-pdf/${requestId}`
     );
 
     const contentType =

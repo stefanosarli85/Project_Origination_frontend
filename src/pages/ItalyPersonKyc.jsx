@@ -26,7 +26,7 @@ const ItalyIndividualKyc = () => {
 
       const response = await fetch(
 
-        "http://43.205.207.160:1701/api/italy/individual/retrieve-kyc-requests"
+        "https://backend.formula-cf-ai.com/api/italy/individual/retrieve-kyc-requests"
 
       );
  
@@ -54,7 +54,7 @@ const ItalyIndividualKyc = () => {
 
       const response = await fetch(
 
-        "http://43.205.207.160:1701/api/italy/individual/request-kyc",
+        "https://backend.formula-cf-ai.com/api/italy/individual/request-kyc",
 
         {
 
@@ -120,7 +120,7 @@ const ItalyIndividualKyc = () => {
 
       const response = await fetch(
 
-        `http://43.205.207.160:1701/api/italy/individual/download-kyc-pdf/${requestId}`
+        `https://backend.formula-cf-ai.com/api/italy/individual/download-kyc-pdf/${requestId}`
 
       );
  
