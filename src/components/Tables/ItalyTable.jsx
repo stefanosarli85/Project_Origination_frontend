@@ -407,8 +407,8 @@ params.append(
 
 const url =
   hasFilters || hasSorting
-    ? `http://43.205.207.160:1701/api/italy-search-columns?${params.toString()}`
-    : `http://43.205.207.160:1701/api/italy-get-all-records?page=1`;
+    ? `https://backend.formula-cf-ai.com/api/italy-search-columns?${params.toString()}`
+    : `https://backend.formula-cf-ai.com/api/italy-get-all-records?page=1`;
         console.log("API URL:", url);
  
         const response = await fetch(url);
@@ -476,7 +476,7 @@ const handleInfoClick = async (row) => {
 
     // Get schedule status
     const statusResponse = await fetch(
-      `http://43.205.207.160:1701/api/get-schedule-status/${companyCode}`
+      `https://backend.formula-cf-ai.com/api/get-schedule-status/${companyCode}`
     );
 
     const statusData =
@@ -509,7 +509,7 @@ const handleInfoClick = async (row) => {
     });
 
     const response = await fetch(
-      `http://43.205.207.160:1701/api/italy/company/${companyCode}?${params.toString()}`,
+      `https://backend.formula-cf-ai.com/api/italy/company/${companyCode}?${params.toString()}`,
       {
         method: "POST",
       }
@@ -552,7 +552,7 @@ const handleFetchReports = async () => {
       selectedRow.original.codice_fiscale;
 
     const response = await fetch(
-      `http://43.205.207.160:1701/api/get-schedule-status/${companyCode}`
+      `https://backend.formula-cf-ai.com/api/get-schedule-status/${companyCode}`
     );
 
     const data = await response.json();

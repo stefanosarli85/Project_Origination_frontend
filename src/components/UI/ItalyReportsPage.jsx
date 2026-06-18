@@ -20,7 +20,7 @@ console.log("Selected Schedules:", schedules);
   const [isError, setIsError] = useState(false);
   
 
-  const BASE_URL = "http://43.205.207.160:1701";
+  const BASE_URL = "https://backend.formula-cf-ai.com";
 
   // API 1 → Check DB
   // const checkDb = async (cid) => {

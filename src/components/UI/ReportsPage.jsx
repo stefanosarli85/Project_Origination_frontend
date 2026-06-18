@@ -27,7 +27,7 @@ const ReportsPage = () => {
         formData.append("company_code", JSON.stringify(companyCodes));
 
        const response = await fetch(
-  "http://43.205.207.160:1701/api/india/get-report",
+  "https://backend.formula-cf-ai.com/api/india/get-report",
   {
     method: "POST",
     body: formData,
@@ -60,7 +60,7 @@ const ReportsPage = () => {
       companyCodes?.[0];
 
     const response = await fetch(
-      `http://43.205.207.160:1701/api/Fetch-financial-document/${selectedCode}`
+      `https://backend.formula-cf-ai.com/api/Fetch-financial-document/${selectedCode}`
     );
 
     if (!response.ok) {

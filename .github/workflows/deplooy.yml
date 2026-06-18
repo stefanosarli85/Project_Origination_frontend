@@ -20,4 +20,4 @@ jobs:
             docker build -t project-origination-frontend .
             docker stop frontend || true
             docker rm frontend || true
-            docker run -d -p 80:80 --name frontend --restart always project-origination-frontend
+            docker run -d -p 8080:80 --name frontend --restart always project-origination-frontend
