@@ -23,20 +23,20 @@ console.log("Selected Schedules:", schedules);
   const BASE_URL = "http://43.205.207.160:1701";
 
   // API 1 → Check DB
-  const checkDb = async (cid) => {
-    const response = await fetch(
-      `${BASE_URL}/api/italy/check_db/${cid}`
-    );
-    return await response.json();
-  };
+  // const checkDb = async (cid) => {
+  //   const response = await fetch(
+  //     `${BASE_URL}/api/italy/check_db/${cid}`
+  //   );
+  //   return await response.json();
+  // };
 
   // API 2 → Get Company
-  const getCompany = async (cid) => {
-    const response = await fetch(
-      `${BASE_URL}/api/italy/company/${cid}`
-    );
-    return await response.json();
-  };
+  // const getCompany = async (cid) => {
+  //   const response = await fetch(
+  //     `${BASE_URL}/api/italy/company/${cid}`
+  //   );
+  //   return await response.json();
+  // };
 
   // API 3 → Save Company
   const saveCompany = async (cid) => {
@@ -490,30 +490,7 @@ XLSX.writeFile(
         if (!cid) return;
 
         // STEP 1 → Check DB
-        const checkResponse = await checkDb(cid);
-        console.log("CHECK DB:", checkResponse);
-
-        let companyData;
-
-        // STEP 2 → If company exists
-        if (checkResponse?.available === true) {
-          companyData = await getCompany(cid);
-        } else {
-          // STEP 3 → Save then Get
-          const saveResponse = await saveCompany(cid);
-          console.log("SAVE COMPANY:", saveResponse);
-
-          // wait for DB save
-          await new Promise((resolve) =>
-            setTimeout(resolve, 2000)
-          );
-
-          companyData = await getCompany(cid);
-        }
-
-        console.log("COMPANY DATA:", companyData);
-
-        setReportData(companyData);
+    setReportData(location.state?.reportData);
         setIsError(false);
       } catch (error) {
         console.error(error);

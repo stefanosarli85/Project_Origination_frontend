@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import * as XLSX from "xlsx";
+import { Skeleton } from "@mui/material";
 
  
 import {
@@ -283,6 +284,24 @@ const [pagination, setPagination] = useState({
     setSorting(state.sorting || []);
   }
 }, []);
+useEffect(() => {
+  fetchCredit();
+  fetchWallet();
+}, []);
+const handleWalletClick = async () => {
+  try {
+    const response = await fetch(
+      "https://backend.formula-cf-ai.com/api/wallet/transactions"
+    );
+
+    const data = await response.json();
+
+    setWalletTransactions(data.data || []);
+    setWalletDialogOpen(true);
+  } catch (error) {
+    console.error(error);
+  }
+};
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -631,6 +650,10 @@ const [isDownloading, setIsDownloading] = useState(false);
 const [isReportAvailable, setIsReportAvailable] = useState(null);
 const [isFetchingNews, setIsFetchingNews] =
   useState(false);
+  const [creditData, setCreditData] = useState(null);
+const [walletData, setWalletData] = useState(null);
+const [walletTransactions, setWalletTransactions] = useState([]);
+const [walletDialogOpen, setWalletDialogOpen] = useState(false);
  useEffect(() => {
   const selectedRow =
     table?.getSelectedRowModel()?.rows?.[0];
@@ -877,6 +900,37 @@ manualSorting: true,
       : undefined,
   });
   const BASE_URL = "http://43.205.207.160:1701";
+  const fetchCredit = async () => {
+  try {
+    const response = await fetch(
+      "https://backend.formula-cf-ai.com/api/reportaziende/credit"
+    );
+
+    const data = await response.json();
+
+    console.log("CREDIT API", data);
+
+    setCreditData(data);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const fetchWallet = async () => {
+  try {
+    const response = await fetch(
+      "https://backend.formula-cf-ai.com/api/wallet"
+    );
+
+    const data = await response.json();
+
+    console.log("WALLET API", data);
+
+    setWalletData(data);
+  } catch (error) {
+    console.error(error);
+  }
+};
  
 const handleDownload = async () => {
   try {
@@ -1620,6 +1674,18 @@ if (reportData?.data?.CR) {
    <button
   onClick={() => {
     sessionStorage.removeItem("currentStep");
+   <Box
+  sx={{
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 2,
+    mb: 2,
+    mt: 2,
+  }}
+>
+  {/* Credit Card */}
+  
+</Box>
     sessionStorage.removeItem("currentRegion");
     window.location.assign("/search-companies");
   }}
@@ -1636,7 +1702,194 @@ if (reportData?.data?.CR) {
 >
   ← Back to Landing Page
 </button>
+<Box
+  sx={{
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: 3,
+    mb: 2,
+    mr: 2,
+  }}
+>
+ <Box
+  sx={{
+    width: 260,
+    height: 95,
+    bgcolor: "#fff",
+    borderRadius: "16px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+    display: "flex",
+    alignItems: "center",
+    px: 2,
+    position: "relative",
+    overflow: "hidden",
+    borderLeft: "4px solid #6D4AFF",
+  }}
+>
+  <Box
+    sx={{
+      width: 52,
+      height: 52,
+      borderRadius: "12px",
+      bgcolor: "#F3EEFF",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      mr: 2,
+      fontSize: "24px",
+    }}
+  >
+    💳
+  </Box>
+
+  <Box>
+    <Typography
+      sx={{
+        fontSize: "12px",
+        color: "#9CA3AF",
+        fontWeight: 600,
+        textTransform: "uppercase",
+      }}
+    >
+      Available Credit
+    </Typography>
+
+    <Typography
+      sx={{
+        fontSize: "42px",
+        fontWeight: 700,
+        color: "#1F2937",
+        lineHeight: 1.1,
+      }}
+    >
+      {creditData?.available_credit ?? 0}
+    </Typography>
+  </Box>
+</Box>
+
+  <Box
+  onClick={handleWalletClick}
+  sx={{
+    width: 260,
+    height: 95,
+    bgcolor: "#fff",
+    borderRadius: "16px",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+    display: "flex",
+    alignItems: "center",
+    px: 2,
+    cursor: "pointer",
+    overflow: "hidden",
+    borderLeft: "4px solid #F59E0B",
+
+    "&:hover": {
+      transform: "translateY(-2px)",
+      transition: "0.3s",
+      boxShadow: "0 8px 25px rgba(0,0,0,0.12)",
+    },
+  }}
+>
+  <Box
+    sx={{
+      width: 52,
+      height: 52,
+      borderRadius: "12px",
+      bgcolor: "#FFF4E5",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      mr: 2,
+      fontSize: "24px",
+    }}
+  >
+    💼
+  </Box>
+
+  <Box>
+    <Typography
+      sx={{
+        fontSize: "12px",
+        color: "#9CA3AF",
+        fontWeight: 600,
+        textTransform: "uppercase",
+      }}
+    >
+      Wallet Balance
+    </Typography>
+
+    <Typography
+      sx={{
+        fontSize: "42px",
+        fontWeight: 700,
+        color: "#1F2937",
+        lineHeight: 1.1,
+      }}
+    >
+     {walletData?.data?.credit !== undefined ? (
+  `€ ${walletData.data.credit}`
+) : (
+  <Skeleton
+    variant="text"
+    width={80}
+    height={40}
+    sx={{ borderRadius: 1 }}
+  />
+)}
+    </Typography>
+  </Box>
+</Box>
+</Box>
       <MaterialReactTable table={table} />
+      <Dialog
+  open={walletDialogOpen}
+  onClose={() => setWalletDialogOpen(false)}
+  maxWidth="lg"
+  fullWidth
+>
+  <DialogContent>
+    <Typography
+      variant="h6"
+      sx={{ mb: 2 }}
+    >
+      Wallet Transactions
+    </Typography>
+
+    <table
+      style={{
+        width: "100%",
+        borderCollapse: "collapse",
+      }}
+    >
+      <thead>
+        <tr>
+          <th style={thStyle}>Amount</th>
+          <th style={thStyle}>Description</th>
+          <th style={thStyle}>Date</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {walletTransactions.map((item) => (
+          <tr key={item.id}>
+            <td style={tdStyle}>
+              {item.amount}
+            </td>
+
+            <td style={tdStyle}>
+              {item.description}
+            </td>
+
+            <td style={tdStyle}>
+              {new Date(
+                item.createdAt
+              ).toLocaleString()}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </DialogContent>
+</Dialog>
  
       <Dialog
         open={modalOpen}
