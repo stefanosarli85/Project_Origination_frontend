@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import * as XLSX from "xlsx";
 import { Skeleton } from "@mui/material";
-
+import creditLogo from "../../assets/credit-logo.png";
+import walletLogo from "../../assets/wallet-logo.jpg";
  
 import {
   MaterialReactTable,
@@ -1726,21 +1727,26 @@ if (reportData?.data?.CR) {
     borderLeft: "4px solid #6D4AFF",
   }}
 >
-  <Box
-    sx={{
-      width: 52,
-      height: 52,
-      borderRadius: "12px",
-      bgcolor: "#F3EEFF",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      mr: 2,
-      fontSize: "24px",
-    }}
-  >
-    💳
-  </Box>
+<Box
+  sx={{
+    width: 110,
+    height: 40,
+    mr: 2,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  }}
+>
+ <img
+  src={creditLogo}
+  alt="Reportaziende"
+  style={{
+    width: "140px",
+    height: "auto",
+    objectFit: "contain",
+  }}
+/>
+</Box>
 
   <Box>
     <Typography
@@ -1789,21 +1795,28 @@ if (reportData?.data?.CR) {
     },
   }}
 >
-  <Box
-    sx={{
-      width: 52,
-      height: 52,
-      borderRadius: "12px",
-      bgcolor: "#FFF4E5",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      mr: 2,
-      fontSize: "24px",
-    }}
-  >
-    💼
-  </Box>
+<Box
+  sx={{
+    width: 56,
+    height: 56,
+    borderRadius: "14px",
+    bgcolor: "#fff7ed",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    mr: 2,
+  }}
+>
+  <img
+  src={walletLogo}
+  alt="OpenAPI"
+  style={{
+    width: "70px",
+    height: "auto",
+    objectFit: "contain",
+  }}
+/>
+</Box>
 
   <Box>
     <Typography
@@ -1814,7 +1827,7 @@ if (reportData?.data?.CR) {
         textTransform: "uppercase",
       }}
     >
-      Wallet Balance
+       Wallet Balance
     </Typography>
 
     <Typography
