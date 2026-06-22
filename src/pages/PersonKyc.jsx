@@ -13,26 +13,33 @@ const PersonKyc = () => {
  
   try {
     const response = await fetch(
-      "https://backend.formula-cf-ai.com/api/global/kyc-check",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-  type: "person",
-  firstName,
-  lastName,
-  birthDate,
-}),
-      }
-    );
+  "https://backend.formula-cf-ai.com/api/global/kyc",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: {
+        firstName,
+        lastName,
+        birthDate,
+        entityType: "I",
+      },
+    }),
+  }
+);
 
- const result = await response.json();
-console.log("STATUS:", response.status);
-console.log("KYC RESULT:", result);
-    navigate("/kyc-result", {
-  state: result.data,
+const result = await response.json();
+
+const listResponse = await fetch(
+  "https://backend.formula-cf-ai.com/api/kyc/individual"
+);
+
+const listData = await listResponse.json();
+
+navigate("/kyc-result", {
+  state: listData,
 });
   } catch (error) {
     console.error(error);
@@ -44,6 +51,7 @@ console.log("KYC RESULT:", result);
   kycResult.evidences?.length === 0;
  
  
+  
  
   return (
     <div className="container py-5">

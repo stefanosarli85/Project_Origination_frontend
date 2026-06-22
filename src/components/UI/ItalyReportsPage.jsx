@@ -2055,7 +2055,7 @@ console.log("YEARS", schedule05Years);
         <tr>
           <td style={thStyle}>Credit Line</td>
           <td style={tdStyle}>
-            {scheduleCR?.linea_credito_affidamento?.toLocaleString() ?? "-"}
+            {scheduleCR?.linea_credito_affidamento?.toLocaleString() ?? "-"} 
           </td>
         </tr>
       </tbody>
