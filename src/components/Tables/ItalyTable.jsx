@@ -1488,6 +1488,27 @@ incomeData.cashFlow = {
 
   
 }
+const transposeData = (data) => {
+  const years = Object.keys(data);
+
+  const result = [];
+
+  const firstYear = years[0];
+
+  Object.keys(data[firstYear] || {}).forEach((itemKey) => {
+    const row = {
+      "Financial Item": itemKey,
+    };
+
+    years.forEach((year) => {
+      row[year] = data[year]?.[itemKey] ?? "";
+    });
+
+    result.push(row);
+  });
+
+  return result;
+};
 const handleExportDialogExcel = () => {
   const workbook = XLSX.utils.book_new();
 
@@ -1516,57 +1537,77 @@ const handleExportDialogExcel = () => {
     );
   }
 if (Object.keys(schedule05).length) {
+  const data = transposeData(schedule05);
+
+  const years = Object.keys(schedule05).sort(
+  (a, b) => Number(b) - Number(a)
+);
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      Object.entries(schedule05).map(([year, value]) => ({
-        Year: year,
-        ...value,
-      }))
-    ),
+    worksheet,
     "05 Company Overview"
   );
 }
 if (incomeStatement?.length) {
+  const data = transposeData(
+    Object.fromEntries(incomeStatement)
+  );
+
+  const years = incomeStatement
+    .map(([year]) => year)
+    .sort((a, b) => Number(b) - Number(a));
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      incomeStatement.map(([year, item]) => ({
-        Year: year,
-        ...item,
-      }))
-    ),
+    worksheet,
     "10 Financial Statement"
   );
 }
 if (assetsData?.length) {
+  const data = transposeData(
+    Object.fromEntries(assetsData)
+  );
+
+  const years = assetsData
+    .map(([year]) => year)
+    .sort((a, b) => Number(b) - Number(a));
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      assetsData.map(([year, item]) => ({
-        Year: year,
-        ...item,
-      }))
-    ),
+    worksheet,
     "20 Assets"
   );
 }
 if (liabilitiesData?.length) {
-  XLSX.utils.book_append_sheet(
-    workbook,
-    XLSX.utils.json_to_sheet(
-      liabilitiesData.map(([year, item]) => ({
-        Year: year,
-        ...item,
-      }))
-    ),
-    "30 Liabilities"
+  const data = transposeData(
+    Object.fromEntries(liabilitiesData)
   );
-}if (people?.length) {
+
+  const years = liabilitiesData
+    .map(([year]) => year)
+    .sort((a, b) => Number(b) - Number(a));
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(people),
-    "85 Management"
+    worksheet,
+    "30 Liabilities"
   );
 }
 if (shareholders?.length) {
@@ -1590,53 +1631,72 @@ if (reportData?.data?.ANA) {
   );
 }
 if (Object.keys(schedule40).length) {
+  const data = transposeData(schedule40);
+
+  const years = Object.keys(schedule40).sort(
+    (a, b) => Number(b) - Number(a)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      Object.entries(schedule40).map(([year, value]) => ({
-        Year: year,
-        ...value,
-      }))
-    ),
+    worksheet,
     "40 Financial Ratios"
   );
 }
-
 if (Object.keys(schedule50).length) {
+  const data = transposeData(schedule50);
+
+  const years = Object.keys(schedule50).sort(
+    (a, b) => Number(b) - Number(a)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      Object.entries(schedule50).map(([year, value]) => ({
-        Year: year,
-        ...value,
-      }))
-    ),
+    worksheet,
     "50 Profitability"
   );
 }
 
 if (Object.keys(schedule60).length) {
+  const data = transposeData(schedule60);
+
+  const years = Object.keys(schedule60).sort(
+    (a, b) => Number(b) - Number(a)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      Object.entries(schedule60).map(([year, value]) => ({
-        Year: year,
-        ...value,
-      }))
-    ),
+    worksheet,
     "60 Productivity"
   );
 }
 
 if (Object.keys(schedule70).length) {
+  const data = transposeData(schedule70);
+
+  const years = Object.keys(schedule70).sort(
+    (a, b) => Number(b) - Number(a)
+  );
+
+  const worksheet = XLSX.utils.json_to_sheet(data, {
+    header: ["Financial Item", ...years],
+  });
+
   XLSX.utils.book_append_sheet(
     workbook,
-    XLSX.utils.json_to_sheet(
-      Object.entries(schedule70).map(([year, value]) => ({
-        Year: year,
-        ...value,
-      }))
-    ),
+    worksheet,
     "70 Growth"
   );
 }
