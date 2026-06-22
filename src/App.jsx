@@ -67,6 +67,7 @@ function App() {
   element: <KycRegionSelect />,
 },
 
+
     {
       path: "/selected-companies",
       element: <SelectedCompanies />,
@@ -78,6 +79,10 @@ function App() {
 {
   path: "/italy-company-kyc",
   element: <ItalyCompanyKyc />,
+},
+{
+  path: "/kyc-result",
+  element: <KycResult />,
 },
     {
       path: "/login",

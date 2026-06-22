@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 const PersonKyc = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [kycResults, setKycResults] = useState([]);
+  const [kycResult, setKycResult] = useState(null);
+  const navigate = useNavigate();
+
 
   const loadKycRequests = async () => {
     try {
@@ -28,23 +32,31 @@ const PersonKyc = () => {
     e.preventDefault();
 
     try {
-      await fetch(
-        "https://backend.formula-cf-ai.com/api/global/kyc",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query: {
-              firstName,
-              lastName,
-              birthDate,
-              entityType: "I",
-            },
-          }),
-        }
-      );
+      const response = await fetch(
+  "https://backend.formula-cf-ai.com/api/global/kyc",
+  {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query: {
+        firstName,
+        lastName,
+        birthDate,
+        entityType: "I",
+      },
+    }),
+  }
+);
+
+const result = await response.json();
+navigate("/kyc-result", {
+  state: result,
+});
+
+
+setKycResult(result);
 
       await loadKycRequests();
     } catch (error) {
@@ -161,6 +173,21 @@ const recheckStatus = async (requestId) => {
             Check KYC
           </button>
         </form>
+        {kycResult && (
+  <div
+    className={`alert mt-3 ${
+      (kycResult.entities?.length || 0) === 0 &&
+      (kycResult.evidences?.length || 0) === 0
+        ? "alert-success"
+        : "alert-danger"
+    }`}
+  >
+    {(kycResult.entities?.length || 0) === 0 &&
+    (kycResult.evidences?.length || 0) === 0
+      ? "✅ CLEAN"
+      : "⚠️ FLAGGED"}
+  </div>
+)}
       </div>
 
       {/* Table Card */}
@@ -234,7 +261,7 @@ const recheckStatus = async (requestId) => {
                             handleDownload(row)
                           }
                         >
-                          Record Found
+                          Download Pdf
                         </button>
                       </td>
                     </>
