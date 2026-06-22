@@ -37,10 +37,7 @@ function App() {
   path: "/search-companies",
   element: <Home />,
 },
-{
-  path: "/kyc-result",
-  element: <KycResult />,
-},
+
 {
   path: "/kyc-check",
   element: <KycCheck />,
