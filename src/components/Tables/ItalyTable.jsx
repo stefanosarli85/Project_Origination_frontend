@@ -953,20 +953,22 @@ manualSorting: true,
     Select All
   </button>
 )}
-<button
-  onClick={handleExportAllExcel}
-  style={{
-    padding: "10px 16px",
-    background: "#7c3aed",
-    color: "white",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-    fontWeight: "bold",
-  }}
->
-  Export All
-</button>
+{selectAllResults && (
+  <button
+    onClick={handleExportAllExcel}
+    style={{
+      padding: "10px 16px",
+      background: "#7c3aed",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    Export All
+  </button>
+)}
  
    {table.getSelectedRowModel().rows.length > 0 &&
  isReportAvailable !== null && (
