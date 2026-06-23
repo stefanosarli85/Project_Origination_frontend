@@ -20,6 +20,15 @@ import {
   IconButton, 
   Typography, 
 } from "@mui/material";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+} from "@mui/material";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import BusinessIcon from "@mui/icons-material/Business";
 import CloseIcon from "@mui/icons-material/Close";
@@ -474,6 +483,7 @@ const handleInfoClick = async (row) => {
   try {
     const companyCode =
       row.original.codice_fiscale;
+      console.log("SELECTED ROW", selectedRowData);
 
     // Get schedule status
     const statusResponse = await fetch(
@@ -527,6 +537,7 @@ console.log("RELATED DATA KEYS",
 );
 
     setSelectedRowData(row.original);
+    console.log("EXCEL DATA", row.original);
 
     if (data?.success === true) {
       setReportData(data);
@@ -2124,6 +2135,7 @@ if (reportData?.data?.CR) {
             "&::-webkit-scrollbar-thumb": { background: "#bdbdbd", borderRadius: 3 },
           }}
         >
+          
           {availableSchedules.includes("05") && (
   <>
     <h2
@@ -2372,6 +2384,7 @@ if (reportData?.data?.CR) {
     </table>
   </>
 )}
+
 {availableSchedules.includes("40") && (
   <>
     <h2
@@ -3358,7 +3371,238 @@ if (reportData?.data?.CR) {
     </tbody>
   </table>
 </Box>
+<h2
+  style={{
+    padding: "18px 22px",
+    margin: 0,
+    background: "linear-gradient(90deg,#1e3a8a,#2563eb)",
+    color: "#fff",
+  }}
+>
+  10 Financial Statement
+</h2>
 
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Financial Item</th>
+      <th style={thStyle}>2022</th>
+      <th style={thStyle}>2023</th>
+      <th style={thStyle}>2024</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td style={tdStyle}>Operating Revenue</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ricavi_operativi_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ricavi_operativi_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ricavi_operativi_2024 || 0).toLocaleString()}</td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Total Production Value</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_valore_produzione_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_valore_produzione_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_valore_produzione_2024 || 0).toLocaleString()}</td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Total Production Cost</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_costi_produzione_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_costi_produzione_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.totale_costi_produzione_2024 || 0).toLocaleString()}</td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Employee Cost</td>
+      <td style={tdStyle}>{Number(selectedRowData?.costo_personale_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.costo_personale_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.costo_personale_2024 || 0).toLocaleString()}</td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Depreciation</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ammortamenti_e_svalutazioni_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ammortamenti_e_svalutazioni_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ammortamenti_e_svalutazioni_2024 || 0).toLocaleString()}</td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>EBIT</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ebit_2022 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ebit_2023 || 0).toLocaleString()}</td>
+      <td style={tdStyle}>{Number(selectedRowData?.ebit_2024 || 0).toLocaleString()}</td>
+    </tr>
+  </tbody>
+</table>
+<h2
+  style={{
+    padding: "18px 22px",
+    margin: 0,
+    background: "linear-gradient(90deg,#1e3a8a,#2563eb)",
+    color: "#fff",
+    marginTop: "20px",
+  }}
+>
+  20 Assets Balance Sheet
+</h2>
+
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Financial Item</th>
+      <th style={thStyle}>2022</th>
+      <th style={thStyle}>2023</th>
+      <th style={thStyle}>2024</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td style={tdStyle}>Intangible Assets</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_immateriali_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_immateriali_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_immateriali_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Tangible Assets</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_materiali_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_materiali_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.immobilizzazioni_materiali_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Receivables</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.crediti_verso_clienti_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.crediti_verso_clienti_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.crediti_verso_clienti_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Cash & Cash Equivalents</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.disponibilita_liquide_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.disponibilita_liquide_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.disponibilita_liquide_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h2
+  style={{
+    padding: "18px 22px",
+    margin: 0,
+    background: "linear-gradient(90deg,#1e3a8a,#2563eb)",
+    color: "#fff",
+    marginTop: "20px",
+  }}
+>
+  30 Liabilities Balance Sheet
+</h2>
+
+<table
+  style={{
+    width: "100%",
+    borderCollapse: "collapse",
+  }}
+>
+  <thead>
+    <tr>
+      <th style={thStyle}>Financial Item</th>
+      <th style={thStyle}>2022</th>
+      <th style={thStyle}>2023</th>
+      <th style={thStyle}>2024</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td style={tdStyle}>Total Payables</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.totale_debiti_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.totale_debiti_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.totale_debiti_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Payables within 12 Months</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_entro_12_mesi_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_entro_12_mesi_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_entro_12_mesi_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Payables beyond 12 Months</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_oltre_12_mesi_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_oltre_12_mesi_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.debiti_oltre_12_mesi_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+
+    <tr>
+      <td style={tdStyle}>Employee Severance Fund (TFR)</td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.trattamento_fine_rapporto_2022 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.trattamento_fine_rapporto_2023 || 0).toLocaleString()}
+      </td>
+      <td style={tdStyle}>
+        {Number(selectedRowData?.trattamento_fine_rapporto_2024 || 0).toLocaleString()}
+      </td>
+    </tr>
+  </tbody>
+</table>
  
  
         </DialogContent>
@@ -3508,8 +3752,6 @@ if (reportData?.data?.CR) {
    
   );
 };
- 
- 
-export default ItalyTable;
+ export default ItalyTable;
  
  
