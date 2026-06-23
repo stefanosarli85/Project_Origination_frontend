@@ -1322,7 +1322,7 @@ const incomeStatement =
 );
 const years = Object.keys(
   reportData?.data?.["10"] || {}
-);
+).sort((a, b) => Number(b) - Number(a));
 console.log("YEARS", years);
    
 const incomeData = {
@@ -1736,11 +1736,126 @@ if (reportData?.data?.CR) {
     "CR"
   );
 }
-  XLSX.writeFile(
-    workbook,
-    `${selectedRowData?.denominazione || "Company"}.xlsx`
-  );
-};
+const excel110Data = [
+  {
+    "Financial Item": "Operating Revenue",
+    "2024": selectedRowData?.ricavi_operativi_2024,
+    "2023": selectedRowData?.ricavi_operativi_2023,
+    "2022": selectedRowData?.ricavi_operativi_2022,
+  },
+  {
+    "Financial Item": "Total Production Value",
+    "2024": selectedRowData?.totale_valore_produzione_2024,
+    "2023": selectedRowData?.totale_valore_produzione_2023,
+    "2022": selectedRowData?.totale_valore_produzione_2022,
+  },
+  {
+    "Financial Item": "Total Production Cost",
+    "2024": selectedRowData?.totale_costi_produzione_2024,
+    "2023": selectedRowData?.totale_costi_produzione_2023,
+    "2022": selectedRowData?.totale_costi_produzione_2022,
+  },
+  {
+    "Financial Item": "Employee Cost",
+    "2024": selectedRowData?.costo_personale_2024,
+    "2023": selectedRowData?.costo_personale_2023,
+    "2022": selectedRowData?.costo_personale_2022,
+  },
+  {
+    "Financial Item": "EBIT",
+    "2024": selectedRowData?.ebit_2024,
+    "2023": selectedRowData?.ebit_2023,
+    "2022": selectedRowData?.ebit_2022,
+  },
+];
+
+const ws10 = XLSX.utils.json_to_sheet(excel110Data, {
+  header: ["Financial Item", "2024", "2023", "2022"],
+});
+
+XLSX.utils.book_append_sheet(
+  workbook,
+  ws10,
+  "10 Financial Statement Excel"
+);
+const excel20Data = [
+  {
+    "Financial Item": "Intangible Assets",
+    "2024": selectedRowData?.immobilizzazioni_immateriali_2024,
+    "2023": selectedRowData?.immobilizzazioni_immateriali_2023,
+    "2022": selectedRowData?.immobilizzazioni_immateriali_2022,
+  },
+  {
+    "Financial Item": "Tangible Assets",
+    "2024": selectedRowData?.immobilizzazioni_materiali_2024,
+    "2023": selectedRowData?.immobilizzazioni_materiali_2023,
+    "2022": selectedRowData?.immobilizzazioni_materiali_2022,
+  },
+  {
+    "Financial Item": "Receivables",
+    "2024": selectedRowData?.crediti_verso_clienti_2024,
+    "2023": selectedRowData?.crediti_verso_clienti_2023,
+    "2022": selectedRowData?.crediti_verso_clienti_2022,
+  },
+  {
+    "Financial Item": "Cash & Cash Equivalents",
+    "2024": selectedRowData?.disponibilita_liquide_2024,
+    "2023": selectedRowData?.disponibilita_liquide_2023,
+    "2022": selectedRowData?.disponibilita_liquide_2022,
+  },
+];
+
+const ws20 = XLSX.utils.json_to_sheet(excel20Data, {
+  header: ["Financial Item", "2024", "2023", "2022"],
+});
+
+XLSX.utils.book_append_sheet(
+  workbook,
+  ws20,
+  "20 Assets Excel"
+);
+const excel30Data = [
+  {
+    "Financial Item": "Total Payables",
+    "2024": selectedRowData?.totale_debiti_2024,
+    "2023": selectedRowData?.totale_debiti_2023,
+    "2022": selectedRowData?.totale_debiti_2022,
+  },
+  {
+    "Financial Item": "Payables within 12 Months",
+    "2024": selectedRowData?.debiti_entro_12_mesi_2024,
+    "2023": selectedRowData?.debiti_entro_12_mesi_2023,
+    "2022": selectedRowData?.debiti_entro_12_mesi_2022,
+  },
+  {
+    "Financial Item": "Payables beyond 12 Months",
+    "2024": selectedRowData?.debiti_oltre_12_mesi_2024,
+    "2023": selectedRowData?.debiti_oltre_12_mesi_2023,
+    "2022": selectedRowData?.debiti_oltre_12_mesi_2022,
+  },
+  {
+    "Financial Item": "Employee Severance Fund (TFR)",
+    "2024": selectedRowData?.trattamento_fine_rapporto_2024,
+    "2023": selectedRowData?.trattamento_fine_rapporto_2023,
+    "2022": selectedRowData?.trattamento_fine_rapporto_2022,
+  },
+];
+
+const ws30 = XLSX.utils.json_to_sheet(excel30Data, {
+  header: ["Financial Item", "2024", "2023", "2022"],
+});
+
+XLSX.utils.book_append_sheet(
+  workbook,
+  ws30,
+  "30 Liabilities Excel"
+);
+
+XLSX.writeFile(
+  workbook,
+  `${selectedRowData?.denominazione || "Company"}.xlsx`
+);
+}
   return (
     <>
    <button
@@ -2878,7 +2993,9 @@ if (reportData?.data?.CR) {
                 Financial Item
               </th>
  
-              {years.map((year) => (
+              {[...years]
+  .sort((a, b) => Number(b) - Number(a))
+  .map((year) => (
                 <th key={year} style={thStyle}>
                   {year}
                 </th>
@@ -3033,7 +3150,9 @@ if (reportData?.data?.CR) {
             Financial Item
           </th>
  
-          {years.map((year) => (
+       {[...years]
+  .sort((a, b) => Number(b) - Number(a))
+  .map((year) => (
             <th key={year} style={thStyle}>
               {year}
             </th>
@@ -3210,8 +3329,9 @@ if (reportData?.data?.CR) {
           >
             Financial Item
           </th>
- 
-          {years.map((year) => (
+ {[...years]
+  .sort((a, b) => Number(b) - Number(a))
+  .map((year) => (
             <th key={year} style={thStyle}>
               {year}
             </th>
