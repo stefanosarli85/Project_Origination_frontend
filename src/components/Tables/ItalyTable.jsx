@@ -666,6 +666,7 @@ const [isFetchingNews, setIsFetchingNews] =
 const [walletData, setWalletData] = useState(null);
 const [walletTransactions, setWalletTransactions] = useState([]);
 const [walletDialogOpen, setWalletDialogOpen] = useState(false);
+const [selectAllResults, setSelectAllResults] = useState(false);
  useEffect(() => {
   const selectedRow =
     table?.getSelectedRowModel()?.rows?.[0];
@@ -698,6 +699,73 @@ const [walletDialogOpen, setWalletDialogOpen] = useState(false);
 
   checkStatus();
 }, [rowSelection]);
+ const handleExportAllExcel = async () => {
+  try {
+    const params = new URLSearchParams();
+
+    columnFilters.forEach((filter) => {
+      const value = filter.value?.toString().trim();
+      if (!value) return;
+
+      if (filter.id === "codice_fiscale")
+        params.append("company_code", value);
+
+      if (filter.id === "denominazione")
+        params.append("company_name", value);
+
+      if (filter.id === "comune")
+        params.append("city", value);
+
+      if (filter.id === "codice_ateco")
+        params.append("industry_code", value);
+
+      if (filter.id === "main_industry")
+        params.append("main_industry", value);
+
+      if (filter.id === "sub_industry")
+        params.append("sub_industry", value);
+    });
+
+    params.append("page", "1");
+    params.append("limit", "100000");
+
+    const response = await fetch(
+      `https://backend.formula-cf-ai.com/api/italy-search-columns?${params.toString()}`
+    );
+
+    const result = await response.json();
+
+    const excelData = result.data.map((row) => ({
+      "Company Code": row.codice_fiscale,
+      "Company Name": row.denominazione,
+      City: row.comune,
+      "Industry Code": row.codice_ateco,
+      "Main Industry": row.main_industry,
+      "Sub Industry": row.sub_industry,
+      "Revenue 2024": row.ricavi_operativi_2024,
+      "EBIT 2024": row.ebit_2024,
+      "Employees 2024": row.numero_dipendenti_2024,
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      "Search Results"
+    );
+
+    XLSX.writeFile(
+      workbook,
+      "All_Filtered_Companies.xlsx"
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+
 const handleExportCSV = () => {
   const selectedRows =
     table.getSelectedRowModel().rows;
@@ -706,7 +774,7 @@ const handleExportCSV = () => {
     alert("Please select at least one company");
     return;
   }
-
+ 
   const csvData = selectedRows.map((row) => ({
     "Company Code": row.original.codice_fiscale,
     "Company Name": row.original.denominazione,
@@ -744,7 +812,6 @@ const handleExportCSV = () => {
 
   URL.revokeObjectURL(url);
 };
-
 
 
   const table = useMaterialReactTable({
@@ -859,7 +926,47 @@ manualSorting: true,
   >
     Export Excel
   </button>
+  
 )}
+{columnFilters.length > 0 && (
+  <button
+    onClick={() => {
+  const allRows = {};
+
+  table.getRowModel().rows.forEach((row) => {
+    allRows[row.id] = true;
+  });
+
+  setRowSelection(allRows);
+  setSelectAllResults(true);
+}}
+    style={{
+      padding: "10px 16px",
+      background: "#f59e0b",
+      color: "white",
+      border: "none",
+      borderRadius: "6px",
+      cursor: "pointer",
+      fontWeight: "bold",
+    }}
+  >
+    Select All
+  </button>
+)}
+<button
+  onClick={handleExportAllExcel}
+  style={{
+    padding: "10px 16px",
+    background: "#7c3aed",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  }}
+>
+  Export All
+</button>
  
    {table.getSelectedRowModel().rows.length > 0 &&
  isReportAvailable !== null && (
