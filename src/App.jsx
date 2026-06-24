@@ -5,7 +5,7 @@ import ReportsPage from "./components/UI/ReportsPage";
 import ItalyReportsPage from "./components/UI/ItalyReportsPage";
 import SelectedCompanies from "./components/UI/SelectedCompanies";
 
-import ForgotPassword from "./pages/ForgotPassword";
+
 import NotFoundPage from "./pages/NotFoundPage";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
@@ -29,8 +29,12 @@ import ItalyPersonKyc from "./pages/ItalyPersonKyc";
 
 function App() {
   const router = createBrowserRouter([
-    {
+  {
   path: "/",
+  element: <SignUp />,
+},
+{
+  path: "/landing",
   element: <LandingPage />,
 },
 {
@@ -92,10 +96,7 @@ function App() {
       path: "/signup",
       element: <SignUp />,
     },
-    {
-      path: "/forgot-password",
-      element: <ForgotPassword />,
-    },
+    
 
     // India Reports Page
     {
