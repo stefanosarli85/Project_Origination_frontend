@@ -21,15 +21,15 @@ const LandingPage = () => {
         }}
       >
         <h1
-          style={{
-            fontSize: "42px",
-            fontWeight: "700",
-            marginBottom: "10px",
-            color: "#111827",
-          }}
-        >
-          Company Search Platform
-        </h1>
+  style={{
+    fontSize: "42px",
+    fontWeight: "700",
+    marginBottom: "10px",
+    color: "#111827",
+  }}
+>
+  Company Search Platform TEST
+</h1>
 
         <p
           style={{
