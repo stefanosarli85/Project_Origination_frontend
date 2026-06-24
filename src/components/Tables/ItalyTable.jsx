@@ -1020,7 +1020,7 @@ manualSorting: true,
       ? { color: "error", children: "Error loading data" }
       : undefined,
   });
-  const BASE_URL = "http://43.205.207.160:1701";
+  const BASE_URL = "https://backend.formula-cf-ai.com";
   const fetchCredit = async () => {
   try {
     const response = await fetch(
