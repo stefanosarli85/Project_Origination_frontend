@@ -87,13 +87,10 @@ p: 4,
 borderRadius: 3,
 }}
 > <Typography
-       variant="h4"
-       fontWeight="bold"
-       textAlign="center"
-       mb={3}
-     >
-Sign Up </Typography>
-
+  variant="h4"
+>
+  Welcome - Sign Up
+</Typography>
 
     <form onSubmit={handleSignup}>
       <TextField
