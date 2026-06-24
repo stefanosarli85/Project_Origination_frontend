@@ -35,10 +35,7 @@ const Login = () => {
         }
       );
 
-      console.log(
-        "LOGIN RESPONSE:",
-        response.data
-      );
+     console.log("FULL RESPONSE:", JSON.stringify(response. Data)); 
 
       if (!response.data.success) {
         alert(
@@ -48,10 +45,7 @@ const Login = () => {
         return;
       }
 
-      localStorage.setItem(
-        "token",
-        response.data.token || ""
-      );
+      localStorage.setItem("user", JSON.stringify(response.data.user));
 
       alert("Login successful");
 
