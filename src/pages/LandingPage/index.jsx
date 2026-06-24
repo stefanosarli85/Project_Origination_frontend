@@ -28,7 +28,7 @@ const LandingPage = () => {
     color: "#111827",
   }}
 >
-  Company Search Platform TEST
+  Company Search Platform 
 </h1>
 
         <p
