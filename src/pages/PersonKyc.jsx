@@ -38,7 +38,7 @@ const PersonKyc = () => {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-    },
+    },                                                                                                                                                                                                                                                                                                                            
     body: JSON.stringify({
       query: {
         firstName,
@@ -53,7 +53,7 @@ const PersonKyc = () => {
 const result = await response.json();
 navigate("/kyc-result", {
   state: result,
-});
+});                         
 
 
 setKycResult(result);
@@ -67,7 +67,7 @@ setKycResult(result);
   const handleDownload = (row) => {
     const entities = row.raw_response?.entities || [];
 
-    if (!entities.length) return;
+    if (!entities.length) return; 
 
     const highestEntity = entities.reduce(
       (max, current) =>

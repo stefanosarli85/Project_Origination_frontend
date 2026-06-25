@@ -29,6 +29,7 @@ const CompanyKycResult = () => {
 
   useEffect(() => {
     if (isClean) {
+     
       toast.success(
         "KYC Check Completed Successfully. No matches found."
       );

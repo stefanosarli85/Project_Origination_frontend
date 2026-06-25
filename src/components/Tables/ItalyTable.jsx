@@ -554,14 +554,14 @@ console.log("RELATED DATA KEYS",
   }
 };
 const handleFetchReports = async () => {
-  const selectedRow =
-    table.getSelectedRowModel().rows[0];
+  const selectedRow = table.getSelectedRowModel().rows[0];
 
   if (!selectedRow) return;
 
   try {
-    const companyCode =
-      selectedRow.original.codice_fiscale;
+    setIsFetchingReports(true);   // <-- ADD THIS
+
+    const companyCode = selectedRow.original.codice_fiscale;
 
     const response = await fetch(
       `https://backend.formula-cf-ai.com/api/get-schedule-status/${companyCode}`
@@ -571,36 +571,26 @@ const handleFetchReports = async () => {
 
     console.log("SCHEDULE STATUS", data);
 
-    const statusData =
-      data[companyCode] || {};
+    const statusData = data[companyCode] || {};
 
     setScheduleStatus(statusData);
 
-    const trueSchedules = Object.keys(
-      statusData
-    )
-      .filter(
-        (key) => statusData[key] === true
-      )
+    const trueSchedules = Object.keys(statusData)
+      .filter((key) => statusData[key] === true)
       .map((key) =>
-        key.startsWith("S")
-          ? key.replace("S", "")
-          : key
+        key.startsWith("S") ? key.replace("S", "") : key
       );
 
-    console.log(
-      "AVAILABLE SCHEDULES",
-      trueSchedules
-    );
+    console.log("AVAILABLE SCHEDULES", trueSchedules);
 
-    setAvailableSchedules(
-      trueSchedules
-    );
+    setAvailableSchedules(trueSchedules);
 
     setScheduleDialogOpen(true);
   } catch (error) {
     console.error(error);
     setScheduleDialogOpen(true);
+  } finally {
+    setIsFetchingReports(false);   
   }
 };
 const handleScheduleToggle = (code) => {
@@ -612,6 +602,7 @@ const handleScheduleToggle = (code) => {
 };
 const handleGenerateReport = async () => {
   try {
+    setIsGeneratingReport(true);
     const selectedRow =
       table.getSelectedRowModel().rows[0];
  
@@ -654,14 +645,18 @@ navigate("/italy-reports", {
   },
 });
     setScheduleDialogOpen(false);
-  } catch (error) {
-    console.error(error);
-  }
+ } catch (error) {
+  console.error(error);
+} finally {
+  setIsGeneratingReport(false);
+}
 };
 const [isDownloading, setIsDownloading] = useState(false);
 const [isReportAvailable, setIsReportAvailable] = useState(null);
 const [isFetchingNews, setIsFetchingNews] =
   useState(false);
+  const [isFetchingReports, setIsFetchingReports] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
   const [creditData, setCreditData] = useState(null);
 const [walletData, setWalletData] = useState(null);
 const [walletTransactions, setWalletTransactions] = useState([]);
@@ -894,23 +889,28 @@ manualSorting: true,
       borderBottom: "1px solid #e5e7eb",
     }}
   >
-    <button
-      onClick={handleFetchReports}
-      disabled={
-        table.getSelectedRowModel().rows.length === 0
-      }
-      style={{
-        padding: "10px 16px",
-        background: "#1976d2",
-        color: "white",
-        border: "none",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontWeight: "bold",
-      }}
-    >
-      Fetch Financial Reports
-    </button>
+ <button
+  onClick={handleFetchReports}
+  disabled={
+    table.getSelectedRowModel().rows.length === 0 ||
+    isFetchingReports
+  }
+  style={{
+    padding: "10px 16px",
+    background: "#1976d2",
+    color: "white",
+    border: "none",
+    borderRadius: "6px",
+    cursor: isFetchingReports
+      ? "not-allowed"
+      : "pointer",
+    fontWeight: "bold",
+  }}
+>
+  {isFetchingReports
+    ? "Fetching Financial Reports..."
+    : "Fetch Financial Reports"}
+</button>
     {table.getSelectedRowModel().rows.length > 0 && (
   <button
   onClick={handleExportCSV}
@@ -3957,22 +3957,25 @@ XLSX.writeFile(
         </button>
  
         <button
-          onClick={handleGenerateReport}
-          disabled={
-            selectedSchedules.length === 0
-          }
-          style={{
-            padding: "10px 18px",
-            border: "none",
-            borderRadius: "6px",
-            background: "#2563eb",
-            color: "#fff",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
-        >
-          Generate Report
-        </button>
+  onClick={handleGenerateReport}
+  disabled={
+    selectedSchedules.length === 0 ||
+    isGeneratingReport
+  }
+  style={{
+    padding: "10px 18px",
+    border: "none",
+    borderRadius: "6px",
+    background: "#2563eb",
+    color: "#fff",
+    cursor: isGeneratingReport ? "not-allowed" : "pointer",
+    fontWeight: "bold",
+  }}
+>
+  {isGeneratingReport
+    ? "Generating Report..."
+    : "Generate Report"}
+</button>
       </Box>
     </Box>
   </DialogContent>

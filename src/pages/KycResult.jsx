@@ -51,7 +51,7 @@ margin: "0 auto",
 >
 {/* Summary */} <div className="card mb-4"> <div className="card-header"> <h4>Summary</h4> </div>
 
-```
+
       <div className="card-body">
         <table className="table table-bordered">
           <tbody>
